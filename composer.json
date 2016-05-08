@@ -1,0 +1,39 @@
+{
+    "name": "danack/entitywrangler",
+    "description": "Entities are the heart of your application.",
+    "keywords": ["entity", "core", "library", "db", "database"],
+    "homepage": "https://github.com/danack/EntityWrangler",
+    "autoload": {
+        "psr-0": {
+            "EntityWrangler": "lib/"
+        },
+        "files": [
+            "src/functions.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-0": {
+            "EntityWranglerTest": "test/"
+        }
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Dan Ackroyd",
+            "email": "Danack@basereality.com",
+            "homepage": "http://www.basereality.com"
+        }
+    ],
+    "require-dev": {
+        "danack/tier": "0.5.0",
+        "phpunit/phpunit": "3.7.*",
+        "rdlowrey/auryn": "~1.4",
+        "whatthejeff/nyancat-phpunit-resultprinter": "~1.2"
+    },
+    "require":{
+        "doctrine/dbal": "~2.5.4",
+        "nilportugues/serializer": "~1.1.10",
+        "php": "~5.5 | ~7",
+        "roave/better-reflection": "~1.0"
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "methodCalls": [
+        {
+            "class": "\\Intahwebz\\TableMap\\AbstractQuery",
+            "method": "fetch",
+            "position": 0
+        },
+        {
+            "class": "\\Intahwebz\\TableMap\\SQLQuery",
+            "method": "fetchSingle",
+            "position": 0
+        },
+        {
+            "class": "\\EntityWranglerTest\\Hydrator\\HydratorRegistry",
+            "method": "hydrate",
+            "position": 0
+        },
+        {
+            "class": "Auryn\\Injector",
+            "method": "make",
+            "position": 0
+        }
+    ],
+    "functionCalls": [
+        {
+            "function": "\\mock",
+            "position": 0
+        },
+        {
+            "function": "\\mockObjects",
+            "position": 0
+        }
+        
+    ]
+}
+

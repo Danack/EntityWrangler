@@ -1,0 +1,10 @@
+SELECT 
+    User.user_id as User_user_id, 
+    User.first_name as User_first_name,
+    User.last_name as User_last_name,
+    IssuePriority.issue_priority_id as IssuePriority_issue_priority_id, 
+    IssuePriority.description as IssuePriority_description, 
+    IssuePriority.text as IssuePriority_text, 
+    IssuePriority.priority as IssuePriority_priority 
+FROM User User, IssuePriority IssuePriority 
+WHERE user.first_name like  ?
