@@ -6,6 +6,7 @@ use Tier\InjectionParams;
 // These classes will only be created  by the injector once
 $shares = [
     new \EntityWrangler\Generator\ClassPath(__DIR__."/../var/analysis"),
+    new \EntityWrangler\SavePath(__DIR__."/../test/compile"),
 ];
     
 
@@ -18,7 +19,7 @@ $aliases = [
 // Delegate the creation of types to callables.
 $delegates = [
     //\GithubService\GithubArtaxService\GithubService::class => 'createGithubService',
-    \Doctrine\DBAL\Query\QueryBuilder::class => 'createDBALQueryBuilder'
+    \Doctrine\DBAL\Query\QueryBuilder::class => 'EntityWranglerTest\App::createDBALQueryBuilder'
 ];
 
 // If necessary, define some params that can be injected purely by name.

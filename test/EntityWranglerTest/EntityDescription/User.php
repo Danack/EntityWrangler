@@ -20,10 +20,10 @@ class User implements EntityDefinition
         $fields = [];
         $fields[] = new Field('firstName', 'string', 'The user\'s first name');
         $fields[] = new Field('lastName', 'string', 'The user\'s last name');
-        
+
         return $fields;
     }
-    
+
     public static function getIndexes()
     {
         return [];

@@ -2,6 +2,7 @@
 
 namespace EntityWrangler\Fragment;
 
+use EntityWrangler\EntityWranglerException;
 use EntityWrangler\QueryFragment;
 use EntityWrangler\Query\Query;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
@@ -20,11 +21,11 @@ class WhereFragment implements QueryFragment
      */
     function __construct($whereCondition, $value, $sqlType)
     {
-        if($sqlType === NULL) {
-            if($value !== NULL) {
-                throw new \BadFunctionCallException("Value is set for where fragment. You must also set type.");
-            }
-        }
+//        if($sqlType === NULL) {
+//            if($value !== NULL) {
+//                throw new EntityWranglerException("Value is set for where fragment. You must also set type.");
+//            }
+//        }
         
         $this->whereCondition = $whereCondition;
         $this->value = $value;

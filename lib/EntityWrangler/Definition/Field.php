@@ -52,40 +52,5 @@ class Field
         }
         
         return self::DATA_TYPE_STRING;
-        
-//        //Found the column
-//        if(isset($column['type']) == true && $column['type'] == 'i'){
-//            return self::DATA_TYPE_INT;
-//        }
-//        if(isset($column['type']) == true && $column['type'] == 'hash'){
-//            return 'hash';
-//        }
-//        if(isset($column['type']) == true && $column['type'] == 'text'){
-//            return 'text';
-//        }
-//        else if(isset($column['type']) == true &&
-//            $column['type'] == 'd'){
-//        
-//            if (is_scalar($arrayOrValue) == true){
-//                return 's';
-//            }
-//            else if (isset($arrayOrValue[$column[0]]) == false){
-//            //date types when not set default to NOW(), which doesn't add a parameter
-//                return false;
-//            }
-//        }
-//        else{
-//            //Strings, hashes
-//            return 's';
-//        }
-            //}
-//        }
-
-//        $columns = '['.var_export($this->columns, true).']';
-//
-//        throw new \Exception("Failed to find columnName [$columnNameToFind] in tableMap: ".$this->schema.".".$this->tableName." Columns are: ".$columns);
     }
-
-    
-    
 }

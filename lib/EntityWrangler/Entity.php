@@ -60,7 +60,7 @@ class Entity
         );
 
         $fields = array_merge($fields, $definition->getFields());
-        $instance = new self(
+        $instance = new static(
             $definition->getName(),
             'test',
             $fields,

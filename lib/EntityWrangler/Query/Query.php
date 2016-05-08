@@ -37,13 +37,6 @@ class Query
     protected $aliasCount = 0;
 
     /**
-     * @var array
-     */
-    private  $params = array();
-
-    private  $paramsTypes = "";
-
-    /**
      * @var array Stores the data returned from a query before being returned.
      */
     private  $data = array();
@@ -56,6 +49,10 @@ class Query
 
     /** @var array */
     protected $outputClassnames = array();
+    
+    /** @var   */
+    protected $dbalQueryBuilder;
+    
     
     public function __construct(DBALQueryBuilder $dbalQueryBuilder)
     {
@@ -70,27 +67,13 @@ class Query
         return $this->dbalQueryBuilder;
     }
 
-//    /**
-//     * @param TableMap $tableMap
-//     * @internal param $alias
-//     * @return QueriedTable
-//     */
-//    abstract function aliasTableMap(TableMap $tableMap);
-//
-//    abstract function count();
-//    abstract function delete();
-//    abstract function fetch();
-//
-//    abstract function fetchObjects();
-    
-
-    function table(Entity $entity, QueriedEntity $joinEntity = null)
+    function table(Entity $entity, $entityClassName, QueriedEntity $joinEntity = null)
     {
         if ($joinEntity == null) {
             $joinEntity = $this->previousTable;
         }
 
-        $queriedTable = $this->aliasEntity($entity);        
+        $queriedTable = $this->aliasEntity($entity, $entityClassName);
         $newFragment = new TableFragment($queriedTable, $joinEntity);
         $this->queryFragments[] = $newFragment;
         $this->previousTable = $queriedTable;
@@ -114,22 +97,7 @@ class Query
 
         return $newFragment->queriedEntity;
     }
-    
-    
 
-    
-//    /**
-//     * 
-//     * @param TableMap $tableMap
-//     * @param QueriedTable $joinTableMap
-//     * @return SQLTableFragment - The QueriedTable to join this one to, if not the previous
-//     */
-//    function makeTableFragment(Entity $tableMap, QueriedEntity $joinTableMap = null) {
-//        $queriedTable = $this->aliasTableMap($tableMap);        
-//        $newFragment = new SQLTableFragment($queriedTable, $joinTableMap);
-//
-//        return $newFragment;
-//    }
 
     
 //
@@ -159,8 +127,9 @@ class Query
      * @param QueriedEntity $queriedEntity
      * @param $column
      */
-    public function select(QueriedEntity $queriedEntity, $column) {
-        $newFragment = new SQLSelectColumnFragment($queriedEntity, $column);
+    public function select(QueriedEntity $queriedEntity, $column)
+    {
+        $newFragment = new SelectColumnFragment($queriedEntity, $column);
         $this->queryFragments[] = $newFragment;
     }
 
@@ -199,7 +168,7 @@ class Query
      * @param null $type
      * @throws \Exception
      */
-    function where($condition, $value = NULL, $type = NULL)
+    function where($condition, $value, $type)
     {
         $this->queryFragments[] = new WhereFragment($condition, $value, $type);
     }
@@ -302,27 +271,21 @@ class Query
      * @param $value
      */
     function setValue($name, $value){
-        $newFragment = new SQLValueFragment($name, $value);
+        $newFragment = new ValueFragment($name, $value);
         $this->queryFragments[] = $newFragment;
     }
 
 
-//    /**
-//     * @param $objectNamespace
-//     * @param $objectClassname
-//     */
-//    function addOutputClass($objectNamespace, $objectClassname) {
-//        $this->outputClassnames[] = $objectNamespace.'\\'.$objectClassname;
-//    }
-    
-    
-    
-
-    function aliasEntity(Entity $tableMap)
+    /**
+     * @param Entity $tableMap
+     * @param $entityClassName
+     * @return QueriedEntity
+     */
+    function aliasEntity(Entity $tableMap, $entityClassName)
     {
         $tableAlias = $this->getAliasForTable($tableMap);
 
-        return new QueriedEntity($tableMap, $tableAlias, $this);
+        return new $entityClassName($tableMap, $tableAlias, $this);
     }
 
 //    /**
@@ -355,32 +318,6 @@ class Query
 //        $this->columnsArray[] = &$this->data[$resultName];
 //    }
 
-//    /**
-//     * Reset the query to allow it to be used for afresh.
-//     * @TODO - this is a bad design. People should just be using a new query object.
-//     */
-//    private function reset() {
-//        $this->queryString = "select ";
-//        $this->commaString = "";
-//        $this->params = array();
-//        $this->paramsTypes = "";
-//
-//        $this->data = array();
-//        $this->columnsArray = array();
-//
-//        $this->tableNamesUsed = array();
-//        $this->aliasCount = 0;
-//    }
-
-//    /**
-//     * @param $string
-//     */
-//    function addSQL($string) {
-//        $this->queryString .= " ";
-//        $this->queryString .= $string;
-//        $this->queryString .= " ";
-//        $this->queryString .= "\n";
-//    }
 
     /**
      * 
@@ -615,11 +552,6 @@ class Query
 
             $this->dbalQueryBuilder = $fn($this->dbalQueryBuilder);
         }
-        
-        //var_dump($fns);
-        //echo "SQL is: ".$this->dbalQueryBuilder->getSQL()."\n";
-        //exit(0);
-
 
         return $this->dbalQueryBuilder;
     }
@@ -1232,26 +1164,7 @@ class Query
 //    }
 
 
-//    function generateClassname() {
-//
-//        $separator = '';
-//        $classname = '';
-//        $namespace = null;
-//        
-//        foreach ($this->outputClassnames as $outputClassname) {
-//            $classname .= $separator; 
-//            $classname .= getClassName($outputClassname);
-//            $separator = 'X'; //The x makes it look cool
-//            
-//            if ($namespace == null) {
-//                $namespace = getNamespace($outputClassname);
-//            }
-//        }
-//
-//        $fullClasname = $namespace.'\\'.$classname;
-//
-//        return $fullClasname;
-//    }
+
 
 }
 

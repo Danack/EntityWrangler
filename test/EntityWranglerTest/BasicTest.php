@@ -16,6 +16,7 @@ use EntityWranglerTest\Hydrator\UserWithIssuesHydrator;
 use EntityWranglerTest\Hydrator\UserWithIssuesWithCommentsHydrator;
 use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
 use EntityWranglerTest\Hydrator\IssueWithCommentsAndUserHydrator;
+use EntityWranglerTest\Table\UserTable;
 
 
 class BasicTest extends \PHPUnit_Framework_TestCase 
@@ -40,8 +41,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             last_name VARCHAR NOT NULL
             );"
         );
-        
-        
+
         //$userId = $conn->lastInsertId();
 
         $conn->exec("INSERT INTO User ('first_name', 'last_name') VALUES ('Dan','dman');");
@@ -247,10 +247,24 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(2, $contentArray[0]['User_user_id']);
         $this->assertEquals(1, $contentArray[1]['User_user_id']);
     }
-    
 
-    function testJoin()
+
+    /**
+     * @group magic
+     */
+    function testMagic()
     {
-        $query = $this->injector->make('EntityWrangler\Query\Query');
+        $fn = function() {
+            $userDef = new User();
+            return UserTable::createFromDefinition($userDef);
+        };
+
+        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $fn);
+        
+        $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
+        $query->userTable()->whereFirstNameEquals('Dan');        
+        $contentArray = $query->fetch();
+
+        var_dump($contentArray);
     }
 }

@@ -2,6 +2,9 @@
 
 namespace EntityWrangler\Definition;
 
+use EntityWrangler\Definition\Column;
+use EntityWrangler\Definition\Field;
+
 /**
  * Class Relation
  * 
@@ -33,5 +36,19 @@ class Relation
         $this->fieldName = $fieldName;
         $this->entity = $entity;
         $this->relationType = $relationType;
+    }
+    
+    public function getColumns()
+    {
+        $column = new Column(
+            $this->fieldName."Id",
+            Field::DATA_TYPE_INT,
+            'Foreign key to '.$this->entity,
+            snakify($this->fieldName)
+        );
+        
+        return [
+            $column
+        ];
     }
 }

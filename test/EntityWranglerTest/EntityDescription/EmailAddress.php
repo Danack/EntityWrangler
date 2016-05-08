@@ -32,6 +32,7 @@ class EmailAddress implements EntityDefinition
     {
         $relations = [];
         $relations[] = new Relation('user', User::getName(), Relation::ONE_TO_ONE);
+
         return $relations;
     }
 }

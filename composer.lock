@@ -4,8 +4,42 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "9bb873c0ed910f3ee99ebaab12d2079d",
+    "hash": "0ee123eacb9b10dd5b34535c72f95a9d",
     "packages": [
+        {
+            "name": "danack/danack-code",
+            "version": "2.4.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Danack/DanackCode.git",
+                "reference": "d14f469e7042a6397214037c20ee92246b1c109a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Danack/DanackCode/zipball/d14f469e7042a6397214037c20ee92246b1c109a",
+                "reference": "d14f469e7042a6397214037c20ee92246b1c109a",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.23"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-0": {
+                    "Danack\\Code\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "description": "provides facilities to generate arbitrary code using an object oriented interface",
+            "keywords": [
+                "code",
+                "zf2"
+            ],
+            "time": "2014-09-15 22:26:39"
+        },
         {
             "name": "doctrine/annotations",
             "version": "v1.2.7",

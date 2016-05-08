@@ -12,17 +12,17 @@ class QueriedEntity
 {
     use SafeAccess;
 
-    public $alias;
+    private $alias;
 
     /**
      * @var Entity
      */
-    public $entity;
+    private $entity;
 
     /**
      * @var Query
      */
-    public $abstractQuery;
+    private $abstractQuery;
 
     function __construct(Entity $entity, $alias, Query $abstractQuery)
     {

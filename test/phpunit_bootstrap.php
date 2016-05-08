@@ -3,7 +3,7 @@
 
 $autoloader = require(__DIR__.'/../vendor/autoload.php');
 
-use Doctrine\DBAL\DriverManager;
+
 
 
 // Contains helper functions for the 'framework'.
@@ -58,10 +58,3 @@ function createTestInjector($mocks = array(), $shares = array())
 }
 
 
-function createDBALQueryBuilder()
-{
-    $conn = DriverManager::getConnection(['pdo' => new PDO('sqlite:testing.sqlite')]);
-    $queryBuilder = $conn->createQueryBuilder();
-    
-    return $queryBuilder;
-}

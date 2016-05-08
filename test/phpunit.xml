@@ -21,9 +21,9 @@
     -->
     
     <groups>
-        <exclude>
-            <group>broken</group>
-        </exclude>
+        <include>
+            <group>magic</group>
+        </include>
     </groups>
 
     <listeners>
