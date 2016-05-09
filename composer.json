@@ -35,6 +35,7 @@
         "doctrine/dbal": "~2.5.4",
         "nilportugues/serializer": "~1.1.10",
         "php": "~5.5 | ~7",
-        "roave/better-reflection": "~1.0"
+        "roave/better-reflection": "~1.0",
+        "zendframework/zend-hydrator": "~2.2"
     }
 }

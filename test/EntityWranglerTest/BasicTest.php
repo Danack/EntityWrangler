@@ -17,6 +17,16 @@ use EntityWranglerTest\Hydrator\UserWithIssuesWithCommentsHydrator;
 use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
 use EntityWranglerTest\Hydrator\IssueWithCommentsAndUserHydrator;
 use EntityWranglerTest\Table\UserTable;
+use EntityWranglerTest\Table\IssueTable;
+
+use EntityWranglerTest\TableGateway\IssueTableGateway;
+use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
+//use EntityWranglerTest\TableGateway\UserTableGateway;
+use Zend\Hydrator\Aggregate\AggregateHydrator;
+use EntityWranglerTest\ZendHydrator\UserHydrator;
+use EntityWranglerTest\TableGateway\UserTableGateway;
+use EntityWranglerTest\Model\UserWithIssues;
+
 
 
 class BasicTest extends \PHPUnit_Framework_TestCase 
@@ -265,6 +275,56 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $query->userTable()->whereFirstNameEquals('Dan');        
         $contentArray = $query->fetch();
 
-        var_dump($contentArray);
+        
     }
+    
+    /**
+     * @group magic
+     */
+    function testMoreMagic()
+    {
+        //https://zf2.readthedocs.io/en/latest/modules/zend.stdlib.hydrator.aggregate.html
+        
+        $userFn = function() {
+            $userDef = new User();
+            return UserTable::createFromDefinition($userDef);
+        };
+
+        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
+        
+        $issueFn = function() {
+            $issueDef = new Issue();
+            return IssueTable::createFromDefinition($issueDef);
+        };
+        
+        $this->injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
+        
+        $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
+        $userTableQueried = $query->userTable();
+        $issueTableQueried = $query->issueTable();
+        
+        $userTableQueried->whereFirstNameEquals('Dan');        
+        $contentArray = $query->fetch();
+
+        
+        var_dump($contentArray);
+
+        $hydrator = new AggregateHydrator();
+        $userTableGateway = UserTableGateway::fromResultSet(
+            $hydrator,
+            $contentArray, 
+            $userTableQueried->getAlias()
+        );
+
+        $hydrator->add(new UserHydrator());
+        $users = $userTableGateway->fetchAll();
+        var_dump($users);
+    }
+    
+    
+    //        $issueTableGateway = IssueTableGateway::fromResultSet($contentArray, $userTableQueried->getAlias());
+//        $issueCommentTableGateway = IssueCommentTableGateway::fromResultSet($contentArray, 'p_');
+
+    
+    
 }

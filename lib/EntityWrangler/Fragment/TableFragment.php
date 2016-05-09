@@ -61,7 +61,6 @@ class TableFragment implements QueryFragment
 //      ->join('u', 'phonenumbers', 'p', 'p.is_primary = 1');
 
             if ($this->queriedJoinTableMap !== nulL) {
-                echo "adjsodpojs";
                 $condition = sprintf(
                     '%s.%s = %s.%s',
                     $this->queriedJoinTableMap->getAlias(),
