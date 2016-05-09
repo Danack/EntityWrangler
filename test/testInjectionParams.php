@@ -6,7 +6,7 @@ use Tier\InjectionParams;
 // These classes will only be created  by the injector once
 $shares = [
     new \EntityWrangler\Generator\ClassPath(__DIR__."/../var/analysis"),
-    new \EntityWrangler\SavePath(__DIR__."/../test/compile"),
+    new \EntityWrangler\SavePath(__DIR__."/../test"),
 ];
     
 

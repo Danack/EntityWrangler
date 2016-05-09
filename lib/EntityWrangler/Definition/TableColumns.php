@@ -12,6 +12,16 @@ class TableColumns
     public static function fromDefinition(EntityDefinition $entityDefinition)
     {
         $instance = new self();
+        
+        $idName = $entityDefinition->getName().'Id';
+        
+        $instance->columns[] = new Column(
+            $idName,
+            'int',
+            'Primary key',
+            snakify($idName)
+        );
+
         foreach ($entityDefinition->getFields() as $field) {
             $instance->columns[] = new Column(
                 $field->getName(),
@@ -20,9 +30,7 @@ class TableColumns
                 snakify($field->getName())
             );
         }
-        
-        
-        
+
         foreach ($entityDefinition->getRelations() as $relation) {
             $columns = $relation->getColumns();
             $instance->columns = array_merge($columns, $instance->columns);

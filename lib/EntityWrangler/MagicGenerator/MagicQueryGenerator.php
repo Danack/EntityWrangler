@@ -112,8 +112,9 @@ class MagicQueryGenerator
     private function save()
     {
         $code = $this->classGenerator->generate();
-        @mkdir($this->savePath->getPath(), 0755, true);
+        $fullPath = $this->savePath->getPath()."/EntityWranglerTest/Magic";
+        @mkdir($fullPath, 0755, true);
         $code = "<?php \n\n".$code;
-        file_put_contents($this->savePath->getPath().'/MagicQuery.php', $code);
+        file_put_contents($fullPath.'/MagicQuery.php', $code);
     }
 }

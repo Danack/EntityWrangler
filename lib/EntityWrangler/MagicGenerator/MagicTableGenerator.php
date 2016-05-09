@@ -62,14 +62,74 @@ class MagicTableGenerator
     {
         $name = $entityDefinition->getName().'Table';
         
-        $this->classGenerator = new ClassGenerator($name, 'Entity');     
+        $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Table');
+
         $this->classGenerator->setExtendedClass('Entity');
         $this->classGenerator->addUse('EntityWrangler\Entity');
         $this->classGenerator->addUse('EntityWrangler\Query\Query');
         $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
     }
+    
+    public function setupQueriedClass(EntityDefinition $entityDefinition)
+    {
+        $name = 'Queried'.$entityDefinition->getName().'Table';
+        $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Table');
+        $this->classGenerator->setExtendedClass('QueriedEntity');
+        $this->classGenerator->addUse('EntityWrangler\Entity');
+        $this->classGenerator->addUse('EntityWrangler\Query\Query');
+        $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
+    }
+    
 
     public function generate(EntityDefinition $entityDefinition)
+    {
+        $this->generateTable($entityDefinition);
+        $this->generateQueriedTable($entityDefinition);
+    }
+
+    public function addWhereColumnEqualsMethod(Column $column)
+    {
+        $columnName = $column->getName();
+        $body = 'return $this->whereColumn("'.lcfirst($columnName).'", $string);';
+        $docBlockTags = [
+            //new ReturnTag('string')
+        ];
+
+        $docBlock = new DocBlockGenerator(
+            "blah blah.",
+            null, 
+            $docBlockTags
+        );
+
+        $method = new MethodGenerator(
+            'where'.ucfirst($column->getName()).'Equals',
+            [new ParameterGenerator('string')],
+            MethodGenerator::FLAG_PUBLIC,
+            $body,
+            $docBlock
+            
+        );
+
+        $this->classGenerator->addMethodFromGenerator($method);
+    }
+    
+    function addQueriedColumn(Column $tableColumn)
+    {
+        $this->addWhereColumnEqualsMethod($tableColumn);
+    }
+    
+    
+    private function generateQueriedTable(EntityDefinition $entityDefinition)
+    {
+        $this->setupQueriedClass($entityDefinition);
+        $tableColumns = TableColumns::fromDefinition($entityDefinition);
+        foreach ($tableColumns->getColumns() as $tableColumn) {
+            $this->addQueriedColumn($tableColumn);
+        }
+        $this->saveQueried($entityDefinition->getName());
+    }
+
+    private function generateTable(EntityDefinition $entityDefinition)
     {
         $this->setupClass($entityDefinition);
         $tableColumns = TableColumns::fromDefinition($entityDefinition);
@@ -78,12 +138,26 @@ class MagicTableGenerator
         }
         $this->save($entityDefinition->getName());
     }
-
+    
+    
     private function save($tableName)
     {
         $code = $this->classGenerator->generate();
-        @mkdir($this->savePath->getPath(), 0755, true);
+        $fullPath = $this->savePath->getPath().'/EntityWranglerTest/Table';
+        
+        @mkdir($fullPath, 0755, true);
         $code = "<?php \n\n".$code;
-        file_put_contents($this->savePath->getPath().'/Magic'.$tableName.'.php', $code);
+        file_put_contents($fullPath.'/'.$tableName.'Table.php', $code);
     }
+    
+    private function saveQueried($tableName)
+    {
+        $code = $this->classGenerator->generate();
+        $fullPath = $this->savePath->getPath().'/EntityWranglerTest/Table';
+        
+        @mkdir($fullPath, 0755, true);
+        $code = "<?php \n\n".$code;
+        file_put_contents($fullPath.'/Queried'.$tableName.'Table.php', $code);
+    }
+    
 }
