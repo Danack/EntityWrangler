@@ -1,5 +1,6 @@
 <?php
 
+use EntityWranglerTest\Hydrator\HydratorException;
 
 function snakify($word)
 {
@@ -41,4 +42,37 @@ function getNamespace($namespaceClass)
     return "\\";
 }
 
+function getPrefixedData($data, $prefix)
+{
+    $values = [];
 
+    foreach ($data as $key => $value) {
+        if (strpos($key, $prefix) === 0) {
+            $values[substr($key, strlen($prefix) + 1)] = $value;
+        }
+    }
+
+    return $values;
+}
+
+
+function extractValue(array $data, $keyName)
+{
+    if (array_key_exists($keyName, $data) === true) {
+        return $data[$keyName];
+    }
+
+    throw new HydratorException("Missing key '$keyName' in data ".var_export($data, true));
+}
+
+
+function formatSQL($sql)
+{
+    $searchReplace = [
+        "," => ",\n",
+        "FROM" => "\nFROM",
+        "LEFT JOIN" => "\nLEFT JOIN"
+    ];
+
+    return str_replace(array_keys($searchReplace), $searchReplace, $sql);
+}

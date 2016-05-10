@@ -61,9 +61,9 @@ class LeftTableFragment implements QueryFragment
             $condition = sprintf(
                 '%s.%s = %s.%s',
                 $this->queriedJoinTableMap->getAlias(),
-                $this->queriedJoinTableMap->getPrimaryColumn(),
+                $this->queriedJoinTableMap->getPrimaryColumnName(),
                 $this->queriedEntity->getAlias(),
-                $this->queriedEntity->getPrimaryColumn()
+                $this->queriedEntity->getPrimaryColumnName()
             );
             
             return $queryBuilder->leftJoin(

@@ -69,15 +69,15 @@ class QueriedEntity
      */
     function getAliasedPrimaryColumn()
     {
-        return $this->alias.".".$this->getEntity()->getPrimaryColumn();
+        return $this->alias.".".$this->getEntity()->getPrimaryColumnName();
     }
 
     /**
      * @return bool
      */
-    function getPrimaryColumn()
+    function getPrimaryColumnName()
     {
-        return $this->getEntity()->getPrimaryColumn();
+        return $this->getEntity()->getPrimaryColumnName();
     }
 
     /**
@@ -87,6 +87,14 @@ class QueriedEntity
     {
         return $this->getEntity()->getFields();
     }
+
+
+    function getRelations()
+    {
+        return $this->getEntity()->getRelations();
+    }
+
+
 
     /**
      * @param $column
@@ -126,7 +134,7 @@ class QueriedEntity
     {
         $aliasedTable = $this->getQuery()->aliasTableMap($this->getEntity());
         $this->getQuery()->rand($this, $aliasedTable);
-        $this->getQuery()->order($this, $this->getEntity()->getPrimaryColumn());
+        $this->getQuery()->order($this, $this->getEntity()->getPrimaryColumnName());
         $this->getQuery()->limit(1);
 
         return $aliasedTable;

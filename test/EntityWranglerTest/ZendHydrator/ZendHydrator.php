@@ -9,8 +9,6 @@ class ZendHydrator
 {
     public function __construct()
     {
-
-
         $brandTable = ProductTable::fromResultSet($result, 'b_');
         $productTable = ProductTable::fromResultSet($result, 'p_');
 

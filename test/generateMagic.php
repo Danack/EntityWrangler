@@ -1,21 +1,16 @@
 <?php
 
+use Auryn\Injector;
+
 $autoloader = require(__DIR__.'/../vendor/autoload.php');
 
 // Read application config params
 $injectionParams = require __DIR__."/./testInjectionParams.php";
 
-$injector = new \Auryn\Injector();
+$injector = new Injector();
 
 $injectionParams->addToInjector($injector);
 $injector->share($injector);
-
-
-$queryGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicQueryGenerator');
-
-$tableGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicTableGenerator');
-
-
 
 $descriptions = [
     'EntityWranglerTest\EntityDescription\EmailAddress',
@@ -25,11 +20,14 @@ $descriptions = [
     'EntityWranglerTest\EntityDescription\User',
 ];
 
+
+$tableGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicTableGenerator');
 foreach ($descriptions as $description) {
     $descriptionObject = new $description();
     $tableGenerator->generate($descriptionObject);
 }
 
+$queryGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicQueryGenerator');
 foreach ($descriptions as $description) {
     $descriptionObject = new $description();
     $tableName = 'EntityWranglerTest\Table\\'.$descriptionObject->getName().'Table';
@@ -39,8 +37,6 @@ foreach ($descriptions as $description) {
     );
 
     $queryGenerator->addEntity($table);
-
 }
-
 
 $queryGenerator->generate();

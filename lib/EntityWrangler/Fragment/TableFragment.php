@@ -3,6 +3,7 @@
 namespace EntityWrangler\Fragment;
 
 use EntityWrangler\Entity;
+use EntityWrangler\EntityWranglerException;
 use EntityWrangler\Query\QueriedEntity;
 use EntityWrangler\QueryFragment;
 use EntityWrangler\Query\Query;
@@ -51,6 +52,28 @@ class TableFragment implements QueryFragment
         return $fields;
     }
 
+    public function findJoiningColumn(QueriedEntity $queriedEntity, QueriedEntity $queriedJoinTableMap)
+    {
+        $primaryColumnName = $queriedJoinTableMap->getPrimaryColumnName();
+
+        foreach ($queriedEntity->getColumns() as $column) {
+            if ($column->getName() == $primaryColumnName) {
+                return $column->getName();
+            }
+        }
+
+        foreach ($queriedEntity->getRelations() as $relation) {
+            if ($relation->fieldName.'_id' == $primaryColumnName) {
+                return $primaryColumnName;
+            }
+        }
+
+
+
+        throw new EntityWranglerException("Failed to find joining column to join ".$queriedEntity->getTableName()." with ".$queriedJoinTableMap->getTableName());
+    }
+
+
     public function tableBit(Query $query)
     {
         $fn = function (DBALQueryBuilder $queryBuilder) {
@@ -61,15 +84,16 @@ class TableFragment implements QueryFragment
 //      ->join('u', 'phonenumbers', 'p', 'p.is_primary = 1');
 
             if ($this->queriedJoinTableMap !== nulL) {
+                $joiningColumn = $this->findJoiningColumn($this->queriedEntity, $this->queriedJoinTableMap);
                 $condition = sprintf(
                     '%s.%s = %s.%s',
                     $this->queriedJoinTableMap->getAlias(),
-                    $this->queriedJoinTableMap->getPrimaryColumn(),
+                    $this->queriedJoinTableMap->getPrimaryColumnName(),
                     $this->queriedEntity->getAlias(),
-                    $this->queriedEntity->getPrimaryColumn()
+                    $joiningColumn
                 );
                 
-                return $queryBuilder->join(
+                return $queryBuilder->leftJoin(
                     $this->queriedJoinTableMap->getAlias(),
                     $this->queriedEntity->getTableName(),
                     $this->queriedEntity->getAlias(),

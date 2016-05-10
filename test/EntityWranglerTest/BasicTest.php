@@ -16,16 +16,26 @@ use EntityWranglerTest\Hydrator\UserWithIssuesHydrator;
 use EntityWranglerTest\Hydrator\UserWithIssuesWithCommentsHydrator;
 use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
 use EntityWranglerTest\Hydrator\IssueWithCommentsAndUserHydrator;
+
+use EntityWranglerTest\Model\UserWithIssues;
 use EntityWranglerTest\Table\UserTable;
 use EntityWranglerTest\Table\IssueTable;
 
-use EntityWranglerTest\TableGateway\IssueTableGateway;
-use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
+
 //use EntityWranglerTest\TableGateway\UserTableGateway;
 use Zend\Hydrator\Aggregate\AggregateHydrator;
-use EntityWranglerTest\ZendHydrator\UserHydrator;
+
+use EntityWranglerTest\TableGateway\IssueTableGateway;
+use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
 use EntityWranglerTest\TableGateway\UserTableGateway;
-use EntityWranglerTest\Model\UserWithIssues;
+use EntityWranglerTest\TableGateway\UserIssueTableGateway;
+
+
+use EntityWranglerTest\ZendHydrator\IssueHydrator;
+use EntityWranglerTest\ZendHydrator\UserHydrator;
+use EntityWranglerTest\ZendHydrator\UserIssueHydrator;
+
+
 
 
 
@@ -38,6 +48,23 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {
         $this->injector = createTestInjector();
         $this->buildDB();
+    }
+
+    public function delegateTables()
+    {
+        $userFn = function() {
+            $userDef = new User();
+            return UserTable::createFromDefinition($userDef);
+        };
+
+        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
+
+        $issueFn = function() {
+            $issueDef = new Issue();
+            return IssueTable::createFromDefinition($issueDef);
+        };
+
+        $this->injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
     }
     
     public static function buildDB()
@@ -99,7 +126,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
 
         $issueId = $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('issue the first', 'checking this works', $danUserId, 1);");
         $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('second issue', 'Lorem ipsum description', $danUserId, 2);");
-        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $danUserId, 3);");
+        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $gordonUserId, 3);");
 
         
         
@@ -133,8 +160,30 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             $statement->execute();
         }
 
-//        $contentArray = $conn->fetchAll("select * from IssueComment;");
-//        var_dump($contentArray);
+//        echo "Users ***************\n";
+//        $statement = $conn->query("select * from User;");
+//        var_dump($statement->fetchAll(\PDO::FETCH_ASSOC));
+//
+//        echo "Issue ***************\n";
+//        $statement = $conn->query("select * from Issue;");
+//        var_dump($statement->fetchAll(\PDO::FETCH_ASSOC));
+//
+//
+//        $debug = "SELECT User.user_id as User_user_id,
+// User.first_name as User_first_name,
+// User.last_name as User_last_name,
+// Issue.issue_id as Issue_issue_id,
+// Issue.description as Issue_description,
+// Issue.text as Issue_text
+//FROM User User
+//JOIN Issue Issue
+//ON User.user_id = Issue.issue_id
+//WHERE user.first_name like 'Dan' order by Issue_issue_id desc";
+//
+//        echo "Join ***************\n";
+//        $statement = $conn->query($debug);
+//        var_dump($statement->fetchAll(\PDO::FETCH_ASSOC));
+//
 //        exit(0);
     }
 
@@ -264,18 +313,10 @@ class BasicTest extends \PHPUnit_Framework_TestCase
      */
     function testMagic()
     {
-        $fn = function() {
-            $userDef = new User();
-            return UserTable::createFromDefinition($userDef);
-        };
-
-        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $fn);
-        
+        $this->delegateTables();
         $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
         $query->userTable()->whereFirstNameEquals('Dan');        
         $contentArray = $query->fetch();
-
-        
     }
     
     /**
@@ -284,47 +325,49 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testMoreMagic()
     {
         //https://zf2.readthedocs.io/en/latest/modules/zend.stdlib.hydrator.aggregate.html
-        
-        $userFn = function() {
-            $userDef = new User();
-            return UserTable::createFromDefinition($userDef);
-        };
+        $this->delegateTables();
 
-        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
-        
-        $issueFn = function() {
-            $issueDef = new Issue();
-            return IssueTable::createFromDefinition($issueDef);
-        };
-        
-        $this->injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
-        
         $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
         $userTableQueried = $query->userTable();
         $issueTableQueried = $query->issueTable();
-        
-        $userTableQueried->whereFirstNameEquals('Dan');        
-        $contentArray = $query->fetch();
+        $userTableQueried->whereFirstNameEquals('Dan');
 
-        
-        var_dump($contentArray);
+        $queryBuilder = $query->buildQuery();
+
+        $statement = $queryBuilder->execute();
+        $contentArray = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
         $hydrator = new AggregateHydrator();
+
+        $issueTableGateway = IssueTableGateway::fromResultSet(
+            $hydrator,
+            $contentArray,
+            $issueTableQueried->getAlias()
+        );
+
         $userTableGateway = UserTableGateway::fromResultSet(
             $hydrator,
-            $contentArray, 
+            $contentArray,
             $userTableQueried->getAlias()
         );
 
-        $hydrator->add(new UserHydrator());
-        $users = $userTableGateway->fetchAll();
-        var_dump($users);
-    }
-    
-    
-    //        $issueTableGateway = IssueTableGateway::fromResultSet($contentArray, $userTableQueried->getAlias());
-//        $issueCommentTableGateway = IssueCommentTableGateway::fromResultSet($contentArray, 'p_');
+        $userIssueTableGateway = UserIssueTableGateway::fromResultSet(
+            $issueTableGateway,
+            $userTableGateway,
+            $hydrator,
+            $contentArray
+        );
 
-    
-    
+        $hydrator->add(new IssueHydrator());
+        $hydrator->add(new UserHydrator());
+        $hydrator->add(new UserIssueHydrator($issueTableGateway));
+
+        $userWithIssuesArray = $userIssueTableGateway->fetchAll();
+
+        foreach ($userWithIssuesArray as $userWithIssues) {
+            $this->assertInstanceOf(UserWithIssues::class, $userWithIssues);
+            $this->assertEquals("Dan", $userWithIssues->user->firstName);
+            $this->assertCount(2, $userWithIssues->issues);
+        }
+    }
 }

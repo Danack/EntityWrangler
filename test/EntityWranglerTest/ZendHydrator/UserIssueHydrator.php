@@ -4,17 +4,8 @@ namespace EntityWranglerTest\ZendHydrator;
 
 use EntityWranglerTest\TableGateway\IssueTableGateway;
 use Zend\Hydrator\HydratorInterface;
-use EntityWranglerTest\Model\User;
+use EntityWranglerTest\Model\UserWithIssues;
 use EntityWranglerTest\Hydrator\HydratorException;
-
-function extractValue(array $data, $keyName)
-{
-    if (array_key_exists($keyName, $data) === true) {
-        return $data[$keyName];
-    }
-
-    throw new HydratorException("Missing key '$keyName' in data ".var_export($data, true));
-}
 
 class UserIssueHydrator implements HydratorInterface
 {
@@ -25,20 +16,20 @@ class UserIssueHydrator implements HydratorInterface
         $this->issueTableGateway = $issueTableGateway;
     }
     
-    public function hydrate(array $data, $user)
+    public function hydrate(array $data, $userWithIssues)
     {
-        if (!$user instanceof User) {
-            throw new \Exception("Well that's messed up.");
+        if (!$userWithIssues instanceof UserWithIssues) {
+            // Nothing to do.
+            return $userWithIssues;
         }
-        
-        //$user = new User();
-        $user->userId = extractValue($data, 'issue_id');
-        $user->firstName = extractValue($data, 'description');
-        $user->lastName = extractValue($data, 'text');
-        
-        
 
-        return $user;
+//        $userWithIssues->userId = extractValue($data, 'issue_id');
+//        $userWithIssues->firstName = extractValue($data, 'description');
+//        $userWithIssues->lastName = extractValue($data, 'text');
+
+        $this->issueTableGateway->fetchAll();
+
+        return $userWithIssues;
     }
     
     public function extract($object)

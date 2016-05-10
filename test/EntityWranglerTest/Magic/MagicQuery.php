@@ -2,40 +2,32 @@
 
 namespace EntityWranglerTest\Magic;
 
-use EntityWrangler\EntityWranglerException;
 use EntityWrangler\Query\Query;
 use EntityWrangler\SafeAccess;
+use EntityWranglerTest\Table\IssueTable;
 use EntityWranglerTest\Table\UserTable;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
-use EntityWranglerTest\Table\QueriedIssueTable;
 use EntityWranglerTest\Table\QueriedUserTable;
-use Auryn\Injector;
+use EntityWranglerTest\Table\QueriedIssueTable;
 
 class MagicQuery extends Query
 {
-    /** @var  \Auryn\Injector */
-    private $injector;
+    use SafeAccess;
 
-    public function __construct(Injector $injector, DBALQueryBuilder $dbalQueryBuilder)
-    {
-        $this->injector = $injector;
+    protected $issueTable;
+
+    protected $userTable;
+
+    public function __construct(
+        DBALQueryBuilder $dbalQueryBuilder,
+        IssueTable $issueTable,
+        UserTable $userTable
+    ) {
         parent::__construct($dbalQueryBuilder);
+        $this->issueTable = $issueTable;
+        $this->userTable = $userTable;
     }
-    
-    public function __get($name)
-    {
-        if ($name === 'userTable') {
-            return $this->injector->make('EntityWranglerTest\Table\UserTable');
-        }
-        
-        if ($name === 'issueTable') {
-            return $this->injector->make('EntityWranglerTest\Table\IssueTable');
-        }
-        
-        throw new EntityWranglerException("Internal error, unknown property $name");
-    }
-    
-    
+
     /**
      * Join the emailAddressTable table.
      *

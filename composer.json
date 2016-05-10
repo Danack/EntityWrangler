@@ -27,15 +27,13 @@
     "require-dev": {
         "danack/tier": "0.5.0",
         "phpunit/phpunit": "3.7.*",
-        "rdlowrey/auryn": "~1.4",
-        "whatthejeff/nyancat-phpunit-resultprinter": "~1.2"
+        "rdlowrey/auryn": "~1.4"
     },
     "require":{
         "danack/danack-code": "~2.4.4",
         "doctrine/dbal": "~2.5.4",
-        "nilportugues/serializer": "~1.1.10",
         "php": "~5.5 | ~7",
-        "roave/better-reflection": "~1.0",
-        "zendframework/zend-hydrator": "~2.2"
+        "zendframework/zend-hydrator": "~2.2",
+        "zendframework/zend-code": "^3.0"
     }
 }

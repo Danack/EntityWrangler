@@ -71,6 +71,7 @@ class Entity
         return $instance;
     }
 
+    /** @return Relation[] */
     function getRelations()
     {
         return $this->relations;
@@ -132,16 +133,16 @@ class Entity
     }
 
     /**
-     * @return bool
+     * @return string
      */
-    function getPrimaryColumn()
+    function getPrimaryColumnName()
     {
         foreach($this->fields as $field){
             if($field->type === 'primary'){
                 return $field->getName();
             }
         }
-        throw new EntityWranglerException("Entity has no primary column");
+        throw new EntityWranglerException("Entity has no primary column.");
     }
 
 //    /**
