@@ -314,7 +314,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testMagic()
     {
         $this->delegateTables();
-        $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
+        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
         $query->userTable()->whereFirstNameEquals('Dan');        
         $contentArray = $query->fetch();
     }
@@ -327,42 +327,10 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         //https://zf2.readthedocs.io/en/latest/modules/zend.stdlib.hydrator.aggregate.html
         $this->delegateTables();
 
-        $query = $this->injector->make('EntityWranglerTest\Magic\MagicQuery');
-        $userTableQueried = $query->userTable();
-        $issueTableQueried = $query->issueTable();
-        $userTableQueried->whereFirstNameEquals('Dan');
-
-        $queryBuilder = $query->buildQuery();
-
-        $statement = $queryBuilder->execute();
-        $contentArray = $statement->fetchAll(\PDO::FETCH_ASSOC);
-
-        $hydrator = new AggregateHydrator();
-
-        $issueTableGateway = IssueTableGateway::fromResultSet(
-            $hydrator,
-            $contentArray,
-            $issueTableQueried->getAlias()
-        );
-
-        $userTableGateway = UserTableGateway::fromResultSet(
-            $hydrator,
-            $contentArray,
-            $userTableQueried->getAlias()
-        );
-
-        $userIssueTableGateway = UserIssueTableGateway::fromResultSet(
-            $issueTableGateway,
-            $userTableGateway,
-            $hydrator,
-            $contentArray
-        );
-
-        $hydrator->add(new IssueHydrator());
-        $hydrator->add(new UserHydrator());
-        $hydrator->add(new UserIssueHydrator($issueTableGateway));
-
-        $userWithIssuesArray = $userIssueTableGateway->fetchAll();
+        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
+        $query->userTable()->whereFirstNameEquals('Dan');
+        $query->issueTable();
+        $userWithIssuesArray = $query->getAllAsUserWithIssues();
 
         foreach ($userWithIssuesArray as $userWithIssues) {
             $this->assertInstanceOf(UserWithIssues::class, $userWithIssues);

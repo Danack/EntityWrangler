@@ -18,15 +18,8 @@ class MagicQuery extends Query
 
     protected $userTable;
 
-    public function __construct(
-        DBALQueryBuilder $dbalQueryBuilder,
-        IssueTable $issueTable,
-        UserTable $userTable
-    ) {
-        parent::__construct($dbalQueryBuilder);
-        $this->issueTable = $issueTable;
-        $this->userTable = $userTable;
-    }
+    /** @var \EntityWrangler\Query\QueriedEntity[] */
+    protected $queriedTables = [];
 
     /**
      * Join the emailAddressTable table.
@@ -39,6 +32,9 @@ class MagicQuery extends Query
         return $this->table($this->emailAddressTable, QueriedEmailAddressTable::class, $joinEntity);
     }
 
+
+
+
     /**
      * Join the issueTable table.
      *
@@ -47,7 +43,10 @@ class MagicQuery extends Query
      */
     public function issueTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        return $this->table($this->issueTable, QueriedIssueTable::class, $joinEntity);
+        $issueTableQueried = $this->table($this->issueTable, QueriedIssueTable::class, $joinEntity);
+        $this->queriedTables['issueTableQueried'] = $issueTableQueried;
+
+        return $issueTableQueried;
     }
 
     /**
@@ -80,7 +79,10 @@ class MagicQuery extends Query
      */
     public function userTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        return $this->table($this->userTable, QueriedUserTable::class, $joinEntity);
+        $userTableQueried = $this->table($this->userTable, QueriedUserTable::class, $joinEntity);
+        $this->queriedTables['userTableQueried'] = $userTableQueried;
+
+        return $userTableQueried;
     }
 
 
