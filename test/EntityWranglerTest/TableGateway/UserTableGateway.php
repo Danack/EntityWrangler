@@ -4,26 +4,23 @@ namespace EntityWranglerTest\TableGateway;
 
 use EntityWranglerTest\Model\User;
 use Zend\Hydrator\Aggregate\AggregateHydrator;
-
+use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
 
 class UserTableGateway
 {
     private $data;
     private $prefix;
     
-    /** @var  AggregateHydrator */
-    private $aggregateHydrator;
-
-
+    /** @var  AllKnownEntityFactory */
+    private $allKnownEntityFactory;
 
     public static function fromResultSet(
-
-        AggregateHydrator $aggregateHydrator,
+        AllKnownEntityFactory $allKnownEntityFactory,
         array $data,
         $prefix
     ) {
         $instance = new self();
-        $instance->aggregateHydrator = $aggregateHydrator;
+        $instance->allKnownEntityFactory = $allKnownEntityFactory;
         $instance->data = $data;
         $instance->prefix = $prefix;
 
@@ -36,10 +33,14 @@ class UserTableGateway
     public function fetchAll()
     {
         $users = [];
-        $user = new \EntityWranglerTest\Model\User();
         foreach ($this->data as $content) {
             $values = getPrefixedData($content, $this->prefix);
-            $user = $this->aggregateHydrator->hydrate($values, $user);
+
+            $user = $this->allKnownEntityFactory->create(
+                $values,
+                User::class
+            );
+
             $users[$user->userId] = $user;
         }
         

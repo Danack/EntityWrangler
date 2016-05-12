@@ -24,11 +24,9 @@ class UserIssueTableGateway
     public static function fromResultSet(
         IssueTableGateway $issueTableGateway,
         UserTableGateway $userTableGateway,
-        AggregateHydrator $aggregateHydrator,
         array $data
     ) {
         $instance = new self();
-        $instance->aggregateHydrator = $aggregateHydrator;
         $instance->data = $data;
         $instance->userTableGateway = $userTableGateway;
         $instance->issueTableGateway = $issueTableGateway;
@@ -41,10 +39,11 @@ class UserIssueTableGateway
     {
         $userWithIssueList = [];
         $users = $this->userTableGateway->fetchAll();
+
         foreach ($users as $user) {
             $filteredData = $this->userTableGateway->filterDataByUserId($this->data, $user->userId);
             $issues = $this->issueTableGateway->findAllByUserId($filteredData);
-            $userWithIssues = new \EntityWranglerTest\Model\UserWithIssues($user, $issues);
+            $userWithIssues = new UserWithIssues($user, $issues);
             $userWithIssueList[] = $userWithIssues;
         }
 

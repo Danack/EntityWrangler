@@ -38,6 +38,7 @@ use EntityWranglerTest\TableGateway\UserIssueTableGateway;
 use EntityWranglerTest\ZendHydrator\IssueHydrator;
 use EntityWranglerTest\ZendHydrator\UserHydrator;
 use EntityWranglerTest\ZendHydrator\UserIssueHydrator;
+use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
 
 class MoreMagic extends MagicQuery
 {
@@ -67,15 +68,15 @@ class MoreMagic extends MagicQuery
         $issueTableQueried = $this->queriedTables['issueTableQueried'];
         $userTableQueried = $this->queriedTables['userTableQueried'];
 
-        $hydrator = new AggregateHydrator();
+        $entityFactory = new AllKnownEntityFactory();
         $issueTableGateway = IssueTableGateway::fromResultSet(
-            $hydrator,
+            $entityFactory,
             $contentArray,
             $issueTableQueried->getAlias()
         );
 
         $userTableGateway = UserTableGateway::fromResultSet(
-            $hydrator,
+            $entityFactory,
             $contentArray,
             $userTableQueried->getAlias()
         );
@@ -83,13 +84,12 @@ class MoreMagic extends MagicQuery
         $userIssueTableGateway = UserIssueTableGateway::fromResultSet(
             $issueTableGateway,
             $userTableGateway,
-            $hydrator,
             $contentArray
         );
 
-        $hydrator->add(new IssueHydrator());
-        $hydrator->add(new UserHydrator());
-        $hydrator->add(new UserIssueHydrator($issueTableGateway));
+//        $hydrator->add(new IssueHydrator());
+//        $hydrator->add(new UserHydrator());
+//        $hydrator->add(new UserIssueHydrator($issueTableGateway));
         $userWithIssuesArray = $userIssueTableGateway->fetchAll();
 
         return $userWithIssuesArray;
