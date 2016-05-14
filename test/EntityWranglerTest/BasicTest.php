@@ -2,7 +2,7 @@
 
 namespace EntityWranglerTest;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWranglerTest\EntityDescription\EmailAddress;
 use EntityWranglerTest\EntityDescription\User;
 use EntityWranglerTest\EntityDescription\Issue;
@@ -108,11 +108,14 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         );
 
         $conn->exec("INSERT INTO IssuePriority (description) VALUES ('low');");
+        $lowPriorityId = $conn->lastInsertId();
+
         $conn->exec("INSERT INTO IssuePriority (description) VALUES ('medium');");
+        $mediumPriorityId = $conn->lastInsertId();
+        
         $conn->exec("INSERT INTO IssuePriority (description) VALUES ('high');");
-        
-        
-        
+        $highPriorityId = $conn->lastInsertId();
+
         $conn->exec("DROP TABLE IF EXISTS Issue;");
         $conn->exec(
           "CREATE TABLE Issue (
@@ -124,12 +127,11 @@ class BasicTest extends \PHPUnit_Framework_TestCase
           );"
         );
 
-        $issueId = $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('issue the first', 'checking this works', $danUserId, 1);");
-        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('second issue', 'Lorem ipsum description', $danUserId, 2);");
-        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $gordonUserId, 3);");
+        $issueId = $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('issue the first', 'checking this works', $danUserId, $lowPriorityId);");
+        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('second issue', 'Lorem ipsum description', $danUserId, $mediumPriorityId);");
+        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $gordonUserId, $lowPriorityId);");
 
-        
-        
+
         $conn->exec("DROP TABLE IF EXISTS IssueComments;");        
         $conn->exec("DROP TABLE IF EXISTS IssueComment;");
         $conn->exec(
@@ -191,7 +193,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testSimplest()
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = Entity::createFromDefinition(new User());        
+        $userTable = EntityTable::createFromDefinition(new User());        
         $query->table($userTable);//->whereColumn('mockNoteID', 1);
         $contentArray = $query->fetch();
     }
@@ -201,7 +203,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $query = $this->injector->make('EntityWrangler\Query\Query');
         //$table = $this->injector->make('Entity\User');
 
-        $userTable = Entity::createFromDefinition(new User());        
+        $userTable = EntityTable::createFromDefinition(new User());        
         $query->table($userTable)->whereColumn('firstName', 'John');
         $contentArray = $query->fetch();
         $this->assertInternalType('array', $contentArray);
@@ -215,8 +217,8 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
         
-        $userTable = Entity::createFromDefinition(new User());     
-        $emailAddressTable = Entity::createFromDefinition(new EmailAddress());
+        $userTable = EntityTable::createFromDefinition(new User());     
+        $emailAddressTable = EntityTable::createFromDefinition(new EmailAddress());
 
         $userEntity = $query->table($userTable)->whereColumn('firstName', 'Dan');
         $emailAddressEntity = $query->table($emailAddressTable);
@@ -245,9 +247,9 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
         
-        $userTable = Entity::createFromDefinition(new User());
-        $issueTable = Entity::createFromDefinition(new Issue());
-        $issueCommentTable = Entity::createFromDefinition(new IssueComment());
+        $userTable = EntityTable::createFromDefinition(new User());
+        $issueTable = EntityTable::createFromDefinition(new Issue());
+        $issueCommentTable = EntityTable::createFromDefinition(new IssueComment());
 
         $emailAddressEntity = $query->table($issueTable);
         $issueCommentEntity = $query->table($issueCommentTable);
@@ -271,7 +273,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testLimit()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = Entity::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new User());
         $userEntity = $query->table($userTable);
         $query->limit(1);
         $contentArray = $query->fetch();
@@ -286,7 +288,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testOffset()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = Entity::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new User());
         $userEntity = $query->table($userTable);
         $query->offset(1);
         $contentArray = $query->fetch();
@@ -298,7 +300,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testOrder()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = Entity::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new User());
         $userEntity = $query->table($userTable);
         $query->order($userEntity, 'user_id', 'DESC');
 
@@ -338,4 +340,12 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             $this->assertCount(2, $userWithIssues->issues);
         }
     }
+    
+    function testSave()
+    {
+        $this->delegateTables();
+        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
+        $query->createUser();
+    }
+    
 }

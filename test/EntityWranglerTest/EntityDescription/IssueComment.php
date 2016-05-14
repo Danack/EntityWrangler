@@ -4,22 +4,22 @@
 namespace EntityWranglerTest\EntityDescription;
 
 
-use EntityWrangler\Definition\Field;
+use EntityWrangler\Definition\EntityProperty;
 use EntityWrangler\EntityDefinition;
-use EntityWrangler\Definition\Name;
-use EntityWrangler\Definition\Relation;
+use EntityWrangler\Definition\TableInfo;
+use EntityWrangler\Definition\EntityRelation;
 
 class IssueComment implements EntityDefinition
 {
-    public static function getName()
+    public static function getTableInfo()
     {
-        return 'IssueComment';
+        return new TableInfo('dja', 'IssueComment');
     }
 
     public static function getFields()
     {
         $fields = [];
-        $fields[] = new Field('text', 'string', 'The text of the comment');
+        $fields[] = new EntityProperty('text', 'string', 'The text of the comment');
 
         return $fields;
     }
@@ -32,8 +32,15 @@ class IssueComment implements EntityDefinition
     public static function getRelations()
     {
         $relations = [];
-        $relations[] = new Relation('issue', Issue::getName(), Relation::ONE_TO_ONE);
-        $relations[] = new Relation('user', User::getName(), Relation::ONE_TO_ONE);
+        $relations[] = new EntityRelation(
+            'issue', Issue::getTableInfo()->tableName,
+            EntityRelation::ONE_TO_ONE
+        );
+        $relations[] = new EntityRelation(
+            'user',
+            User::getTableInfo()->tableName,
+            EntityRelation::ONE_TO_ONE
+        );
 
         return $relations;
     }

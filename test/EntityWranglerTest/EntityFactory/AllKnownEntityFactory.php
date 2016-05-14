@@ -26,6 +26,6 @@ class AllKnownEntityFactory
         }
 
         $entityFactory = $this->entityFactories[$type];
-        return $entityFactory->create($data);
+        return $entityFactory->create($data);   
     }
 }

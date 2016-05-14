@@ -2,7 +2,7 @@
 
 namespace EntityWrangler\MagicGenerator;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWrangler\SavePath;
 use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\DocBlockGenerator;
@@ -11,6 +11,7 @@ use Zend\Code\Generator\ParameterGenerator;
 use Zend\Code\Generator\DocBlock\Tag;
 use Zend\Code\Generator\DocBlock\Tag\ParamTag;
 use Zend\Code\Generator\DocBlock\Tag\ReturnTag;
+use Zend\Code\Generator\PropertyGenerator;
 use Zend\Code\Generator\TypeGenerator;
 use Zend\Code\Generator\ValueGenerator;
 
@@ -21,7 +22,7 @@ class MagicQueryGenerator
     /** @var  ClassGenerator */
     private $classGenerator;
     
-    /** @var \EntityWrangler\Entity[] */
+    /** @var \EntityWrangler\EntityTable[] */
     private $entities = [];
 
     public function __construct(SavePath $savePath)
@@ -29,7 +30,7 @@ class MagicQueryGenerator
         $this->savePath = $savePath;
     }
     
-    public function addEntity(Entity $entity)
+    public function addEntity(EntityTable $entity)
     {
         $this->entities[] = $entity;
     }
@@ -41,7 +42,7 @@ class MagicQueryGenerator
         }
     }
     
-    public function addTableFunction(Entity $entity)
+    public function addTableFunction(EntityTable $entity)
     {
         $tableName = lcfirst($entity->getName()).'Table';
         
@@ -99,7 +100,30 @@ class MagicQueryGenerator
         $this->classGenerator->addUse('EntityWrangler\SafeAccess');
         $this->classGenerator->addUse('EntityWranglerTest\Table\UserTable');
         $this->classGenerator->addUse('Doctrine\DBAL\Query\QueryBuilder', 'DBALQueryBuilder');
-        $this->classGenerator->addUse('EntityWranglerTest\Table\QueriedUserTable');
+
+        foreach ($this->entities as $entity) {
+            
+            $tableFQCN = sprintf( 
+                'EntityWranglerTest\Table\%sTable',
+                $entity->getName()
+            );
+            
+            $queriedTableFQCN = sprintf( 
+                'EntityWranglerTest\Table\Queried%sTable',
+                $entity->getName()
+            );
+            $this->classGenerator->addUse($queriedTableFQCN);
+
+            $propertyGenerator = new PropertyGenerator(
+                lcfirst($entity->getName()).'Table',
+                null,
+                PropertyGenerator::FLAG_PROTECTED
+            );
+
+            $docBlock = new DocBlockGenerator("@var \\$tableFQCN ");
+            $propertyGenerator->setDocBlock($docBlock);
+            $this->classGenerator->addPropertyFromGenerator($propertyGenerator);
+        }
     }
 
     public function generate()

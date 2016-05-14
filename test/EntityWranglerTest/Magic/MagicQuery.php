@@ -4,22 +4,43 @@ namespace EntityWranglerTest\Magic;
 
 use EntityWrangler\Query\Query;
 use EntityWrangler\SafeAccess;
-use EntityWranglerTest\Table\IssueTable;
 use EntityWranglerTest\Table\UserTable;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
-use EntityWranglerTest\Table\QueriedUserTable;
+use EntityWranglerTest\Table\QueriedEmailAddressTable;
 use EntityWranglerTest\Table\QueriedIssueTable;
+use EntityWranglerTest\Table\QueriedIssueCommentTable;
+use EntityWranglerTest\Table\QueriedIssuePriorityTable;
+use EntityWranglerTest\Table\QueriedUserTable;
 
 class MagicQuery extends Query
 {
-    use SafeAccess;
-
-    protected $issueTable;
-
-    protected $userTable;
-
-    /** @var \EntityWrangler\Query\QueriedEntity[] */
+    /** @var  \EntityWrangler\Query\QueriedTable[] */
     protected $queriedTables = [];
+
+    /**
+     * @var \EntityWranglerTest\Table\EmailAddressTable
+     */
+    protected $emailAddressTable = null;
+
+    /**
+     * @var \EntityWranglerTest\Table\IssueTable
+     */
+    protected $issueTable = null;
+
+    /**
+     * @var \EntityWranglerTest\Table\IssueCommentTable
+     */
+    protected $issueCommentTable = null;
+
+    /**
+     * @var \EntityWranglerTest\Table\IssuePriorityTable
+     */
+    protected $issuePriorityTable = null;
+
+    /**
+     * @var \EntityWranglerTest\Table\UserTable
+     */
+    protected $userTable = null;
 
     /**
      * Join the emailAddressTable table.
@@ -32,9 +53,6 @@ class MagicQuery extends Query
         return $this->table($this->emailAddressTable, QueriedEmailAddressTable::class, $joinEntity);
     }
 
-
-
-
     /**
      * Join the issueTable table.
      *
@@ -43,10 +61,9 @@ class MagicQuery extends Query
      */
     public function issueTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        $issueTableQueried = $this->table($this->issueTable, QueriedIssueTable::class, $joinEntity);
-        $this->queriedTables['issueTableQueried'] = $issueTableQueried;
-
-        return $issueTableQueried;
+        $queriedTable = $this->table($this->issueTable, QueriedIssueTable::class, $joinEntity);
+        $this->queriedTables['issueTableQueried'] = $queriedTable;
+        return $queriedTable;
     }
 
     /**
@@ -79,11 +96,8 @@ class MagicQuery extends Query
      */
     public function userTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        $userTableQueried = $this->table($this->userTable, QueriedUserTable::class, $joinEntity);
-        $this->queriedTables['userTableQueried'] = $userTableQueried;
-
-        return $userTableQueried;
+        $queriedTable = $this->table($this->userTable, QueriedUserTable::class, $joinEntity);
+        $this->queriedTables['userTableQueried'] = $queriedTable;
+        return $queriedTable;
     }
-
-
 }

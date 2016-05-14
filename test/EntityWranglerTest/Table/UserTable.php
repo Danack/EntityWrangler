@@ -2,15 +2,15 @@
 
 namespace EntityWranglerTest\Table;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWrangler\Query\Query;
-use EntityWrangler\Query\QueriedEntity;
+use EntityWrangler\Query\QueriedTable;
 
-class UserTable extends Entity
+class UserTable extends EntityTable
 {
 
     /**
-     * blah blah.
+     * Primary key
      *
      * @return string
      */
@@ -20,7 +20,7 @@ class UserTable extends Entity
     }
 
     /**
-     * blah blah.
+     * The user's first name
      *
      * @return string
      */
@@ -30,7 +30,7 @@ class UserTable extends Entity
     }
 
     /**
-     * blah blah.
+     * The user's last name
      *
      * @return string
      */

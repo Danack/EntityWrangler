@@ -30,8 +30,13 @@ foreach ($descriptions as $description) {
 $queryGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicQueryGenerator');
 foreach ($descriptions as $description) {
     $descriptionObject = new $description();
-    $tableName = 'EntityWranglerTest\Table\\'.$descriptionObject->getName().'Table';
+    /** @var  $descriptionObject \EntityWrangler\EntityDefinition */
+    $tableName = sprintf(
+        'EntityWranglerTest\Table\\%sTable',
+        $descriptionObject->getTableInfo()->tableName
+    );
     
+    /** @var $table \EntityWrangler\EntityTable */
     $table = $tableName::createFromDefinition(
         $descriptionObject
     );

@@ -2,22 +2,23 @@
 
 namespace EntityWrangler\Query;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWrangler\EntityWranglerException;
 use EntityWrangler\SafeAccess;
 use EntityWrangler\QueryFragment;
-use EntityWrangler\Fragment\WhereFragment;
-use EntityWrangler\Fragment\SelectColumnFragment;
-use EntityWrangler\Fragment\TableFragment;
-use EntityWrangler\Fragment\AncestorFragment;
-use EntityWrangler\Fragment\LeftTableFragment;
-use EntityWrangler\Fragment\GroupFragment;
-use EntityWrangler\Fragment\OrderFragment;
-use EntityWrangler\Fragment\NullFragment;
-use EntityWrangler\Fragment\ValueFragment;
-use EntityWrangler\Fragment\LimitFragment;
-use EntityWrangler\Fragment\OffsetFragment;
-use EntityWrangler\Fragment\RandOrderFragment;
+use EntityWrangler\QueryFragment\WhereFragment;
+use EntityWrangler\QueryFragment\SelectColumnFragment;
+use EntityWrangler\QueryFragment\TableFragment;
+use EntityWrangler\QueryFragment\InsertFragment;
+use EntityWrangler\QueryFragment\AncestorFragment;
+use EntityWrangler\QueryFragment\LeftTableFragment;
+use EntityWrangler\QueryFragment\GroupFragment;
+use EntityWrangler\QueryFragment\OrderFragment;
+use EntityWrangler\QueryFragment\NullFragment;
+use EntityWrangler\QueryFragment\ValueFragment;
+use EntityWrangler\QueryFragment\LimitFragment;
+use EntityWrangler\QueryFragment\OffsetFragment;
+use EntityWrangler\QueryFragment\RandOrderFragment;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
 
 class Query 
@@ -44,7 +45,7 @@ class Query
     //This binds the result
     private $columnsArray = array();
 
-    /** @var \EntityWrangler\Query\QueriedEntity  */
+    /** @var \EntityWrangler\Query\QueriedTable  */
     private $previousTable = null;
 
     /** @var array */
@@ -65,9 +66,16 @@ class Query
     public function getQueryBuilder()
     {
         return $this->dbalQueryBuilder;
+
     }
 
-    function table(Entity $entity, $entityClassName, QueriedEntity $joinEntity = null)
+    /**
+     * @param EntityTable $entity
+     * @param $entityClassName
+     * @param QueriedTable $joinEntity
+     * @return QueriedTable
+     */
+    function table(EntityTable $entity, $entityClassName, QueriedTable $joinEntity = null)
     {
         if ($joinEntity == null) {
             $joinEntity = $this->previousTable;
@@ -81,7 +89,7 @@ class Query
         return $newFragment->queriedEntity;
     }
 
-    function leftTable(Entity $entity, QueriedEntity $joinEntity = null)
+    function leftTable(EntityTable $entity, QueriedTable $joinEntity = null)
     {
         if ($joinEntity == null) {
             if ($this->previousTable == null) {
@@ -124,24 +132,22 @@ class Query
 
 
     /**
-     * @param QueriedEntity $queriedEntity
+     * @param QueriedTable $queriedEntity
      * @param $column
      */
-    public function select(QueriedEntity $queriedEntity, $column)
+    public function select(QueriedTable $queriedEntity, $column)
     {
         $newFragment = new SelectColumnFragment($queriedEntity, $column);
         $this->queryFragments[] = $newFragment;
     }
 
     /**
-     * @param Entity $entity
+     * @param EntityTable $entity
      * @return mixed
      */
-    function getAliasForTable(Entity $entity)
+    function getAliasForTable(EntityTable $entity)
     {
-        
         $tableName = $entity->getName();
-        
         if(in_array($tableName, $this->entityNamesUsed) == FALSE){
             $this->entityNamesUsed[] = $tableName;
 
@@ -180,7 +186,7 @@ class Query
      * @param $column
      * @return string
      */
-    function group(QueriedEntity $table, $column) {
+    function group(QueriedTable $table, $column) {
         $this->queryFragments[] = new SQLGroupFragment($table, $column);
 
         
@@ -277,11 +283,11 @@ class Query
 
 
     /**
-     * @param Entity $tableMap
+     * @param EntityTable $tableMap
      * @param $entityClassName
-     * @return QueriedEntity
+     * @return QueriedTable
      */
-    function aliasEntity(Entity $tableMap, $entityClassName)
+    function aliasEntity(EntityTable $tableMap, $entityClassName)
     {
         $tableAlias = $this->getAliasForTable($tableMap);
 
@@ -875,18 +881,16 @@ class Query
 //    }
 
 
-//    //This stays table map
-//    function insertIntoMappedTable(TableMap $tableMap, $data, $foreignKeys = array()) {
-//
-//        $connection = $this->dbConnection;
-//        $typesString = "";
-//
-//        //Todo - check foreign keys meet mapping requirement.
-//
-//        if (is_object($data)) {
-//            $data = convertObjectToArray($data);
-//        }
-//
+    //This stays table map
+    function insertIntoMappedTable(EntityTable $tableMap, $data, $foreignKeys = array())
+    {
+        $this->queryFragments[] = new InsertFragment($tableMap, $data);
+        $this->buildQuery();
+        $statement = $this->dbalQueryBuilder->execute();
+        var_dump($statement);
+
+        //return $statement->fetchAll(\PDO::FETCH_ASSOC);
+
 //        $parameters = array();
 //
 //        $queryString = "insert into ".$tableMap->schema.".".$tableMap->tableName." ( ";
@@ -919,7 +923,7 @@ class Query
 //                $commaString = ', ';
 //            }
 //        }
-//
+
 //
 //        $parameters[0] = $typesString;
 //
@@ -994,7 +998,7 @@ class Query
 //        $this->insertIntoRelationTables($foreignKeys, $tableMap);
 //
 //        return $insertID;
-//    }
+    }
 
 //    function insertIntoRelationTables($foreignKeys, TableMap $tableMap) {
 //

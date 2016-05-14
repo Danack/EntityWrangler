@@ -2,7 +2,7 @@
 
 namespace EntityWrangler\Definition;
 
-use EntityWrangler\Definition\Column;
+use EntityWrangler\Definition\TableColumn;
 use EntityWrangler\EntityDefinition;
 
 class TableColumns
@@ -12,10 +12,8 @@ class TableColumns
     public static function fromDefinition(EntityDefinition $entityDefinition)
     {
         $instance = new self();
-        
-        $idName = $entityDefinition->getName().'Id';
-        
-        $instance->columns[] = new Column(
+        $idName = $entityDefinition->getTableInfo()->tableName.'Id';
+        $instance->columns[] = new TableColumn(
             $idName,
             'int',
             'Primary key',
@@ -23,7 +21,7 @@ class TableColumns
         );
 
         foreach ($entityDefinition->getFields() as $field) {
-            $instance->columns[] = new Column(
+            $instance->columns[] = new TableColumn(
                 $field->getName(),
                 $field->type,
                 $field->description,

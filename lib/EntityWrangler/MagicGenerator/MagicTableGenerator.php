@@ -2,8 +2,8 @@
 
 namespace EntityWrangler\MagicGenerator;
 
-use EntityWrangler\Definition\Field;
-use EntityWrangler\Entity;
+use EntityWrangler\Definition\EntityProperty;
+use EntityWrangler\EntityTable;
 use EntityWrangler\SavePath;
 use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\DocBlockGenerator;
@@ -16,7 +16,8 @@ use Zend\Code\Generator\TypeGenerator;
 use Zend\Code\Generator\ValueGenerator;
 use EntityWrangler\EntityDefinition;
 use EntityWrangler\Definition\TableColumns;
-use EntityWrangler\Definition\Column;
+use EntityWrangler\Definition\TableColumn;
+use EntityWrangler\Definition\TableInfo;
 
 class MagicTableGenerator
 {
@@ -25,27 +26,23 @@ class MagicTableGenerator
     /** @var  ClassGenerator */
     private $classGenerator;
 
-
     public function __construct(SavePath $savePath)
     {
         $this->savePath = $savePath;
     }
 
-
-    public function addColumn(Column $column)
+    public function addColumn(TableColumn $column)
     {
         $columnName = $column->getName();
         $body = "return '$columnName';";
         $docBlockTags = [
             new ReturnTag('string')
         ];
-
         $docBlock = new DocBlockGenerator(
-            "blah blah.",
+            $column->getDescription(),
             null, 
             $docBlockTags
         );
-
         $method = new MethodGenerator(
             "columnName".ucfirst($column->getName()),
             [],
@@ -60,26 +57,23 @@ class MagicTableGenerator
 
     public function setupClass(EntityDefinition $entityDefinition)
     {
-        $name = $entityDefinition->getName().'Table';
-        
+        $name = $entityDefinition->getTableInfo()->tableName.'Table';
         $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Table');
-
-        $this->classGenerator->setExtendedClass('Entity');
-        $this->classGenerator->addUse('EntityWrangler\Entity');
+        $this->classGenerator->setExtendedClass('EntityTable');
+        $this->classGenerator->addUse('EntityWrangler\EntityTable');
         $this->classGenerator->addUse('EntityWrangler\Query\Query');
         $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
     }
-    
+
     public function setupQueriedClass(EntityDefinition $entityDefinition)
     {
-        $name = 'Queried'.$entityDefinition->getName().'Table';
+        $name = 'Queried'.$entityDefinition->getTableInfo()->tableName.'Table';
         $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Table');
         $this->classGenerator->setExtendedClass('QueriedEntity');
-        $this->classGenerator->addUse('EntityWrangler\Entity');
+        $this->classGenerator->addUse('EntityWrangler\EntityTable');
         $this->classGenerator->addUse('EntityWrangler\Query\Query');
         $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
     }
-    
 
     public function generate(EntityDefinition $entityDefinition)
     {
@@ -87,7 +81,7 @@ class MagicTableGenerator
         $this->generateQueriedTable($entityDefinition);
     }
 
-    public function addWhereColumnEqualsMethod(Column $column)
+    public function addWhereColumnEqualsMethod(TableColumn $column)
     {
         $columnName = $column->getName();
         $body = 'return $this->whereColumn("'.lcfirst($columnName).'", $string);';
@@ -113,7 +107,7 @@ class MagicTableGenerator
         $this->classGenerator->addMethodFromGenerator($method);
     }
     
-    function addQueriedColumn(Column $tableColumn)
+    function addQueriedColumn(TableColumn $tableColumn)
     {
         $this->addWhereColumnEqualsMethod($tableColumn);
     }
@@ -126,7 +120,7 @@ class MagicTableGenerator
         foreach ($tableColumns->getColumns() as $tableColumn) {
             $this->addQueriedColumn($tableColumn);
         }
-        $this->saveQueried($entityDefinition->getName());
+        $this->saveQueried($entityDefinition->getTableInfo());
     }
 
     private function generateTable(EntityDefinition $entityDefinition)
@@ -136,28 +130,27 @@ class MagicTableGenerator
         foreach ($tableColumns->getColumns() as $tableColumn) {
             $this->addColumn($tableColumn);
         }
-        $this->save($entityDefinition->getName());
+        $this->save($entityDefinition->getTableInfo());
     }
     
     
-    private function save($tableName)
+    private function save(TableInfo $tableInfo)
     {
         $code = $this->classGenerator->generate();
         $fullPath = $this->savePath->getPath().'/EntityWranglerTest/Table';
         
         @mkdir($fullPath, 0755, true);
         $code = "<?php \n\n".$code;
-        file_put_contents($fullPath.'/'.$tableName.'Table.php', $code);
+        file_put_contents($fullPath.'/'.$tableInfo->tableName.'Table.php', $code);
     }
     
-    private function saveQueried($tableName)
+    private function saveQueried(TableInfo $tableInfo)
     {
         $code = $this->classGenerator->generate();
         $fullPath = $this->savePath->getPath().'/EntityWranglerTest/Table';
         
         @mkdir($fullPath, 0755, true);
         $code = "<?php \n\n".$code;
-        file_put_contents($fullPath.'/Queried'.$tableName.'Table.php', $code);
+        file_put_contents($fullPath.'/Queried'.$tableInfo->tableName.'Table.php', $code);
     }
-    
 }

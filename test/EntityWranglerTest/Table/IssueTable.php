@@ -2,15 +2,15 @@
 
 namespace EntityWranglerTest\Table;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWrangler\Query\Query;
-use EntityWrangler\Query\QueriedEntity;
+use EntityWrangler\Query\QueriedTable;
 
-class IssueTable extends Entity
+class IssueTable extends EntityTable
 {
 
     /**
-     * blah blah.
+     * Foreign key to User
      *
      * @return string
      */
@@ -20,7 +20,7 @@ class IssueTable extends Entity
     }
 
     /**
-     * blah blah.
+     * Primary key
      *
      * @return string
      */
@@ -30,7 +30,7 @@ class IssueTable extends Entity
     }
 
     /**
-     * blah blah.
+     * The description of the issue.
      *
      * @return string
      */
@@ -40,7 +40,7 @@ class IssueTable extends Entity
     }
 
     /**
-     * blah blah.
+     * the text of the issue
      *
      * @return string
      */

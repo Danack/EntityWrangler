@@ -2,15 +2,15 @@
 
 namespace EntityWranglerTest\Table;
 
-use EntityWrangler\Entity;
+use EntityWrangler\EntityTable;
 use EntityWrangler\Query\Query;
-use EntityWrangler\Query\QueriedEntity;
+use EntityWrangler\Query\QueriedTable;
 
-class EmailAddressTable extends Entity
+class EmailAddressTable extends EntityTable
 {
 
     /**
-     * blah blah.
+     * Foreign key to User
      *
      * @return string
      */
@@ -20,7 +20,7 @@ class EmailAddressTable extends Entity
     }
 
     /**
-     * blah blah.
+     * Primary key
      *
      * @return string
      */
@@ -30,7 +30,7 @@ class EmailAddressTable extends Entity
     }
 
     /**
-     * blah blah.
+     * The email address
      *
      * @return string
      */

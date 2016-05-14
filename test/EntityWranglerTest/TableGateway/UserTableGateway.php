@@ -5,6 +5,7 @@ namespace EntityWranglerTest\TableGateway;
 use EntityWranglerTest\Model\User;
 use Zend\Hydrator\Aggregate\AggregateHydrator;
 use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
+use EntityWranglerTest\Magic\MoreMagic;
 
 class UserTableGateway
 {
@@ -61,4 +62,9 @@ class UserTableGateway
         return $filteredData;
     }
 
+    
+    public function createUser(MoreMagic $moreMagic, $firstName, $lastName)
+    {
+        $moreMagic->insert();
+    }
 }

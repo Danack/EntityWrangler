@@ -3,22 +3,22 @@
 
 namespace EntityWranglerTest\EntityDescription;
 
-use EntityWrangler\Definition\Field;
+use EntityWrangler\Definition\EntityProperty;
 use EntityWrangler\EntityDefinition;
-use EntityWrangler\Definition\Name;
-use EntityWrangler\Definition\Relation;
+use EntityWrangler\Definition\TableInfo;
+use EntityWrangler\Definition\EntityRelation;
 
 class EmailAddress implements EntityDefinition
 {
-    public static function getName()
+    public static function getTableInfo()
     {
-        return 'EmailAddress';
+        return new TableInfo('dja', 'EmailAddress');
     }
 
     public static function getFields()
     {
         $fields = [];
-        $fields[] = new Field('address', 'string', 'The email address');
+        $fields[] = new EntityProperty('address', 'string', 'The email address');
         
         return $fields;
     }
@@ -31,7 +31,11 @@ class EmailAddress implements EntityDefinition
     public static function getRelations()
     {
         $relations = [];
-        $relations[] = new Relation('user', User::getName(), Relation::ONE_TO_ONE);
+        $relations[] = new EntityRelation(
+            'user',
+            User::getTableInfo()->tableName,
+            EntityRelation::ONE_TO_ONE
+        );
 
         return $relations;
     }
