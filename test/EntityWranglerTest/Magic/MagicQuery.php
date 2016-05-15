@@ -14,8 +14,10 @@ use EntityWranglerTest\Table\QueriedUserTable;
 
 class MagicQuery extends Query
 {
-    /** @var  \EntityWrangler\Query\QueriedTable[] */
-    protected $queriedTables = [];
+
+    public $queriedTables = array(
+        
+    );
 
     /**
      * @var \EntityWranglerTest\Table\EmailAddressTable
@@ -50,7 +52,10 @@ class MagicQuery extends Query
      */
     public function emailAddressTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        return $this->table($this->emailAddressTable, QueriedEmailAddressTable::class, $joinEntity);
+        $queriedTable = $this->table($this->emailAddressTable, QueriedEmailAddressTable::class, $joinEntity);
+        //This name is not dynamic enough - one table can be queried multiple times.
+        $this->queriedTables['emailAddressTableQueried'] = $queriedTable;
+        return $queriedTable;
     }
 
     /**
@@ -62,6 +67,7 @@ class MagicQuery extends Query
     public function issueTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
         $queriedTable = $this->table($this->issueTable, QueriedIssueTable::class, $joinEntity);
+        //This name is not dynamic enough - one table can be queried multiple times.
         $this->queriedTables['issueTableQueried'] = $queriedTable;
         return $queriedTable;
     }
@@ -74,7 +80,10 @@ class MagicQuery extends Query
      */
     public function issueCommentTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        return $this->table($this->issueCommentTable, QueriedIssueCommentTable::class, $joinEntity);
+        $queriedTable = $this->table($this->issueCommentTable, QueriedIssueCommentTable::class, $joinEntity);
+        //This name is not dynamic enough - one table can be queried multiple times.
+        $this->queriedTables['issueCommentTableQueried'] = $queriedTable;
+        return $queriedTable;
     }
 
     /**
@@ -85,7 +94,10 @@ class MagicQuery extends Query
      */
     public function issuePriorityTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
-        return $this->table($this->issuePriorityTable, QueriedIssuePriorityTable::class, $joinEntity);
+        $queriedTable = $this->table($this->issuePriorityTable, QueriedIssuePriorityTable::class, $joinEntity);
+        //This name is not dynamic enough - one table can be queried multiple times.
+        $this->queriedTables['issuePriorityTableQueried'] = $queriedTable;
+        return $queriedTable;
     }
 
     /**
@@ -97,7 +109,10 @@ class MagicQuery extends Query
     public function userTable(\EntityWranglerTest\Table\QueriedUserTable $joinEntity = null)
     {
         $queriedTable = $this->table($this->userTable, QueriedUserTable::class, $joinEntity);
+        //This name is not dynamic enough - one table can be queried multiple times.
         $this->queriedTables['userTableQueried'] = $queriedTable;
         return $queriedTable;
     }
+
+
 }

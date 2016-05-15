@@ -16,8 +16,8 @@ class EntityList
 
     public function __construct()
     {
-        $this->entityDefinitions[] = \EntityWranglerTest\EntityDescription\User::class;
-        $this->entityDefinitions[] = \EntityWranglerTest\EntityDescription\EmailAddress::class;
+        $this->entityDefinitions[] = \EntityWranglerTest\EntityDefinition\UserDefinition::class;
+        $this->entityDefinitions[] = \EntityWranglerTest\EntityDefinition\EmailAddress::class;
     }
  
     public function getEntity($entityName)
@@ -34,7 +34,7 @@ class EntityList
         $entity = new EntityTable(
             $entityDefinition->getName(),
             'test',
-            $entityDefinition->getFields(),
+            $entityDefinition->getProperties(),
             $entityDefinition->getRelations(),
             $entityDefinition->getIndexes()
         );

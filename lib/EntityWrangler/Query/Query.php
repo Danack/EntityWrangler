@@ -28,6 +28,12 @@ class Query
      */
     private $queryFragments = array();
 
+    const QUERY_TYPE_INSERT = 'insert';
+    
+    const QUERY_TYPE_SELECT = 'select';
+    
+    const QUERY_TYPE_UPDATE = 'update';
+    
     /**
      * @var array List of the names of the table names or aliases already used, so that if a table
      * is used multiple times in a query, the subsequent uses will use different alias.
@@ -89,7 +95,7 @@ class Query
         return $newFragment->queriedEntity;
     }
 
-    function leftTable(EntityTable $entity, QueriedTable $joinEntity = null)
+    function leftTable(EntityTable $entity,  $entityClassName, QueriedTable $joinEntity = null)
     {
         if ($joinEntity == null) {
             if ($this->previousTable == null) {
@@ -98,7 +104,7 @@ class Query
             $joinEntity = $this->previousTable;
         }
         
-        $queriedTable = $this->aliasEntity($entity);        
+        $queriedTable = $this->aliasEntity($entity, $entityClassName);
         $newFragment = new LeftTableFragment($queriedTable, $joinEntity);
         $this->queryFragments[] = $newFragment;
         $this->previousTable = $queriedTable;
@@ -106,9 +112,6 @@ class Query
         return $newFragment->queriedEntity;
     }
 
-
-    
-//
 //    /**
 //     * @param QueriedTable $joinTableMap
 //     * @param $ancestorID
@@ -311,7 +314,7 @@ class Query
 //    private function addColumn(QueriedTable $tableMap, $column) {
 //        $this->addColumnFromTableAlias($tableMap->getAlias(), $column);
 //    }
-//
+
 //    /**
 //     * @param $tableAlias
 //     * @param $column
@@ -332,32 +335,6 @@ class Query
         $this->fetch(false, true);
     }
 
-//    /**
-//     * @param SQLFragment $sqlFragment
-//     * @throws \Exception
-//     */
-//    private function bindParams(BindableParams $sqlFragment) {
-//
-//        $value = &$sqlFragment->getValue();
-//        $type = $sqlFragment->getType();
-//
-//        if($value !== null) {
-//            if(is_array($value) == true) {
-//                if(mb_strlen($type) != count($value)){
-//                    throw new \Exception("Number of values ".count($value)." does not match number of types passed in [".$type."]");
-//                }
-//
-//                foreach($value as &$valueElement){
-//                    $this->params[] = &$valueElement;
-//                }
-//                $this->paramsTypes .= $type;
-//            }
-//            else{
-//                $this->params[] = &$value;
-//                $this->paramsTypes .= $type;
-//            }
-//        }
-//    }
 
 //    /**
 //     * Find the join column between two tables, where the second table
@@ -505,7 +482,7 @@ class Query
 
     
     
-    function buildQuery()
+    protected function buildQuery($type)
     {
         //Automatically add all columns from tables i.e. no specific columns
         //were queried.
@@ -528,6 +505,10 @@ class Query
         }
 
         foreach($this->queryFragments as $fragment) {
+            $fns[] = $fragment->insertBit($this);
+        }
+
+        foreach($this->queryFragments as $fragment) {
             $fns[] = $fragment->whereBit($this);
         }
 
@@ -542,16 +523,20 @@ class Query
         foreach($this->queryFragments as $fragment) {
             $fns[] = $fragment->limitBit($this);
         }
+        
+        if ($type == Query::QUERY_TYPE_INSERT) {
 
-        if (count($fields) !== 0) {
-            call_user_func_array([$this->dbalQueryBuilder, 'select'], $fields);
+        }
+        else {
+            if (count($fields) !== 0) {
+                call_user_func_array([$this->dbalQueryBuilder, 'select'], $fields);
+            }
         }
 
         foreach ($fns as $fn) {
             if ($fn === null) {
                 continue;
             }
-
             if (!is_callable($fn)) {
                 throw new EntityWranglerException('Callback is not callable.');
             }
@@ -563,15 +548,13 @@ class Query
     }
 
 
-    function fetch($doACount = false, $doADelete = false){
-
-        $this->buildQuery();
-        
+    function fetch()
+    {
+        $this->buildQuery(self::QUERY_TYPE_SELECT);
         $statement = $this->dbalQueryBuilder->execute();
-        
         return $statement->fetchAll(\PDO::FETCH_ASSOC);
         
-        //var_dump($user);
+
         
 
 //        if ($doADelete == true) {
@@ -882,113 +865,15 @@ class Query
 
 
     //This stays table map
-    function insertIntoMappedTable(EntityTable $tableMap, $data, $foreignKeys = array())
+    function insertIntoMappedTable(EntityTable $tableMap, $entityClassName, $data, $foreignKeys = array())
     {
-        $this->queryFragments[] = new InsertFragment($tableMap, $data);
-        $this->buildQuery();
-        $statement = $this->dbalQueryBuilder->execute();
-        var_dump($statement);
+        $queriedTable = $this->aliasEntity($tableMap, $entityClassName);
+        $this->queryFragments[] = new InsertFragment($queriedTable, $data);
+        $this->buildQuery(self::QUERY_TYPE_INSERT);
+        $result = $this->dbalQueryBuilder->execute();
 
-        //return $statement->fetchAll(\PDO::FETCH_ASSOC);
+        return $result; 
 
-//        $parameters = array();
-//
-//        $queryString = "insert into ".$tableMap->schema.".".$tableMap->tableName." ( ";
-//
-//        $commaString = '';
-//
-//        foreach($tableMap->columns as $column){
-//            if(isset($column['autoInc']) == TRUE && $column['autoInc']){
-//                //primary keys are never set on insert
-//            }
-//            else{
-//                $queryString .= $commaString;
-//                $queryString .= $column[0];
-//
-//                $columnType = $tableMap->getDataTypeForColumn($column[0], $data);
-//
-//                if($columnType !== FALSE){
-//                    if ($columnType == 'hash'){
-//                        $columnType = 's';
-//                    }
-//
-//                    //TODO check columnType is allowed
-//                    if (in_array($columnType, ['i', 'd', 's', 'b']) == false) {
-//                        throw new \Exception("Column type [$columnType] is not a single letter - bug in TableMap code.");
-//                    }
-//
-//                    $typesString .= $columnType;
-//                }
-//
-//                $commaString = ', ';
-//            }
-//        }
-
-//
-//        $parameters[0] = $typesString;
-//
-//        $queryString .= ") values (";
-//
-//        $commaString = '';
-//
-//        //Pass column as reference, so that if $column['default'] is passed as
-//        //param to MySQLi, next loop doesn't modify it.
-//        foreach($tableMap->columns as &$column){
-//
-//            if(isset($column['autoInc']) == TRUE && $column['autoInc']){
-//                //primary keys are never set on insert
-//            }
-//            else{
-//
-//                if (isset($column['type']) == TRUE &&
-//                    $column['type'] == 'd' &&
-//                    isset($data[$column[0]]) == FALSE){
-//                    $queryString .= $commaString;
-//                    $queryString .= 'now() ';
-//                }
-//                else{
-//                    $queryString .= $commaString;
-//                    $queryString .= "? ";
-//
-//                    if(array_key_exists($column[0], $data) == FALSE ||
-//                        $data[$column[0]] == null){
-//                        if(array_key_exists('default', $column) == TRUE){
-//                            $parameters[] = &$column['default'];
-//                        }
-//                        else{
-//                            throw new \BadFunctionCallException("Data not set for column [".$column[0]."] and it has no default.");
-//                        }
-//                    }
-//                    else{
-//                        if (isset($column['type']) == TRUE &&
-//                            $column['type'] == 'hash'){
-//                            $allegedPassword = $data[$column[0]];
-//                            $options = array('cost' => 11);
-//                            $hash = password_hash($allegedPassword, PASSWORD_BCRYPT, $options);
-//                            $data[$column[0]] = $hash;
-//                        }
-//
-//                        $parameters[] = &$data[$column[0]];
-//                    }
-//                }
-//                $commaString = ', ';
-//            }
-//        }
-//
-//        $queryString .= "); ";
-//
-//        $statementWrapper = $connection->prepareStatement($queryString);
-//
-//        if(mb_strlen($typesString) > 0){ //If we have parameters that need binding.
-//            call_user_func_array(array($statementWrapper->statement, 'bind_param'), $parameters);
-//        }
-//
-//        $statementWrapper->execute();
-//        $insertID = $statementWrapper->statement->insert_id;
-//        $statementWrapper->close();
-//
-//        $foreignKeys[$tableMap->getPrimaryColumn()] = $insertID;
-//
 //        if ($closureRelation = $tableMap->getSelfClosureRelation()) {
 //            $closureTableMapName = $closureRelation->getTableName();
 //            $closureTableMap = new $closureTableMapName();
@@ -996,8 +881,6 @@ class Query
 //        }
 //
 //        $this->insertIntoRelationTables($foreignKeys, $tableMap);
-//
-//        return $insertID;
     }
 
 //    function insertIntoRelationTables($foreignKeys, TableMap $tableMap) {
@@ -1034,62 +917,7 @@ class Query
 //     */
 //    function updateMappedTable(TableMap $tableMap, $params) {
 //
-//        $typesString = "";
-//        $parameters = array(
-//            '', // first element has types injected later
-//        );
-//
-//        if(array_key_exists('where', $params) == FALSE){
-//            throw new \Exception("Where conditions not set, aborting table update.");
-//        }
-//
-//        $queryString = "update ".$tableMap->schema.".".$tableMap->tableName." set ";
-//        $commaString = '';
-//
-//        foreach($params['columns'] as $columnName => &$value){
-//            $queryString .= $commaString;
-//            $queryString .= ' '.$columnName.' = ? ';
-//            $commaString = ', ';
-//
-//            $type = $tableMap->getDataTypeForColumn($columnName, $params['columns']);
-//
-//            if($type !== FALSE){
-//                $typesString .= $type;
-//            }
-//
-//            $parameters[] = &$value;
-//        }
-//
-//        $queryString .= " where ";
-//        $andString = '';
-//
-//        foreach($params['where'] as $columnName => &$value){
-//
-//            $queryString .= $andString;
-//            $queryString .= ''.$columnName.' = ? ';
-//
-//            $andString = ' and ';
-//
-//            $type = $tableMap->getDataTypeForColumn($columnName, $params['where']);
-//
-//            if($type !== FALSE){
-//                $typesString .= $type;
-//            }
-//
-//            $parameters[] = &$value;
-//        }
-//
-//        $connection = $this->dbConnection;
-//
-//        $parameters[0] = $typesString;
-//        $statementWrapper = $connection->prepareStatement($queryString);
-//
-//        call_user_func_array(array($statementWrapper->statement, 'bind_param'), $parameters);
-//
-//        $statementWrapper->execute();
-//
-//        $statementWrapper->close();
-//        $connection->close();
+      // probably need this.
 //    }
 
 //    /**

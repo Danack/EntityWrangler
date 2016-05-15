@@ -17,7 +17,7 @@ class QueriedTable
     /**
      * @var EntityTable
      */
-    private $entity;
+    private $entityTable;
 
     /**
      * @var Query
@@ -26,14 +26,14 @@ class QueriedTable
 
     function __construct(EntityTable $entity, $alias, Query $abstractQuery)
     {
-        $this->entity = $entity;
+        $this->entityTable = $entity;
         $this->alias = $alias;
         $this->abstractQuery = $abstractQuery;
     }
 
-    function getEntity()
+    function getEntityTable()
     {
-        return $this->entity;
+        return $this->entityTable;
     }
 
     function getQuery()
@@ -53,7 +53,7 @@ class QueriedTable
      * @return string
      */
     function getSchema(){
-        return $this->getEntity()->schema;
+        return $this->getEntityTable()->schema;
     }
 
     /**
@@ -61,23 +61,23 @@ class QueriedTable
      */
     function getTableName()
     {
-        return $this->getEntity()->getName();
+        return $this->getEntityTable()->getName();
     }
 
     /**
      * @return string
      */
-    function getAliasedPrimaryColumn()
+    function getAliasedIdentityColumn()
     {
-        return $this->alias.".".$this->getEntity()->getPrimaryColumnName();
+        return $this->alias.".".$this->getEntityTable()->getIdentityColumnName();
     }
 
     /**
      * @return bool
      */
-    function getPrimaryColumnName()
+    function getIdentityColumnName()
     {
-        return $this->getEntity()->getPrimaryColumnName();
+        return $this->getEntityTable()->getIdentityColumnName();
     }
 
     /**
@@ -85,16 +85,17 @@ class QueriedTable
      */
     function getColumns()
     {
-        return $this->getEntity()->getFields();
+        return $this->getEntityTable()->getProperties();
     }
 
 
+    /**
+     * @return \EntityWrangler\Definition\EntityRelation[]
+     */
     function getRelations()
     {
-        return $this->getEntity()->getRelations();
+        return $this->getEntityTable()->getRelations();
     }
-
-
 
     /**
      * @param $column
@@ -111,7 +112,7 @@ class QueriedTable
      */
     function wherePrimary($value)
     {
-        $columnName = $this->getAliasedPrimaryColumn();
+        $columnName = $this->getAliasedIdentityColumn();
         $this->getQuery()->where("$columnName = ?", $value, 'i');
         return $this;
     }
@@ -132,9 +133,9 @@ class QueriedTable
      */
     function rand()
     {
-        $aliasedTable = $this->getQuery()->aliasTableMap($this->getEntity());
+        $aliasedTable = $this->getQuery()->aliasTableMap($this->getEntityTable());
         $this->getQuery()->rand($this, $aliasedTable);
-        $this->getQuery()->order($this, $this->getEntity()->getPrimaryColumnName());
+        $this->getQuery()->order($this, $this->getEntityTable()->getIdentityColumnName());
         $this->getQuery()->limit(1);
 
         return $aliasedTable;
@@ -159,7 +160,7 @@ class QueriedTable
             $rb = ')';
         }
         
-        $dataType = $this->getEntity()->getDataTypeForColumn($column, $value);
+        $dataType = $this->getEntityTable()->getDataTypeForColumn($column, $value);
         switch($dataType) {
             case(EntityProperty::DATA_TYPE_INT): {
                 $this->getQuery()->where($sqlFunctionName.$lb.$columnName.$rb." = ?", $value, $dataType);
@@ -200,9 +201,10 @@ class QueriedTable
      * @param array $values
      * @return $this
      */
-    function whereColumnIn($column, array $values) {
+    function whereColumnIn($column, array $values)
+    {
         $columnName = $this->getColumn($column);
-        $dataType = $this->getEntity()->getDataTypeForColumn($column, null);
+        $dataType = $this->getEntityTable()->getDataTypeForColumn($column, null);
         $dataTypeArray = '';
         $inString = " in ( ";
         $separator = '';

@@ -12,9 +12,9 @@ class QueriedIssueCommentTable extends QueriedTable
     /**
      * blah blah.
      */
-    public function whereUserIdEquals($string)
+    public function whereUserIDEquals($string)
     {
-        return $this->whereColumn("userId", $string);
+        return $this->whereColumn("userID", $string);
     }
 
     /**

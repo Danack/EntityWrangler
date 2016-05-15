@@ -1,22 +1,28 @@
 <?php
 
 
-namespace EntityWranglerTest\EntityDescription;
+namespace EntityWranglerTest\EntityDefinition;
 
 
 use EntityWrangler\Definition\EntityProperty;
 use EntityWrangler\EntityDefinition;
 use EntityWrangler\Definition\TableInfo;
+use EntityWrangler\Definition\EntityIdentity;
 use EntityWrangler\Definition\EntityRelation;
 
-class Issue implements EntityDefinition
+class IssueDefinition implements EntityDefinition
 {
+    public static function getIdentity()
+    {
+        return new EntityIdentity('issueId', 'issue_id');
+    }
+
     public static function getTableInfo()
     {
         return new TableInfo('dja', 'Issue');
     }
 
-    public static function getFields()
+    public static function getProperties()
     {
         $fields = [];
         $fields[] = new EntityProperty('description', 'string', 'The description of the issue.');
@@ -34,8 +40,9 @@ class Issue implements EntityDefinition
     {
         $relations = [];
         $relations[] = new EntityRelation(
-            'user',
-            User::getTableInfo()->tableName,
+            'userId', 'user_id',
+            UserDefinition::getIdentity(),
+            UserDefinition::getTableInfo()->tableName,
             EntityRelation::ONE_TO_MANY
         );
 

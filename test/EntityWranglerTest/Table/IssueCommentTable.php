@@ -14,9 +14,9 @@ class IssueCommentTable extends EntityTable
      *
      * @return string
      */
-    public function columnNameUserId()
+    public function columnNameUserID()
     {
-        return 'userId';
+        return 'user_iD';
     }
 
     /**
@@ -26,7 +26,7 @@ class IssueCommentTable extends EntityTable
      */
     public function columnNameIssueId()
     {
-        return 'issueId';
+        return 'issue_id';
     }
 
     /**
@@ -36,7 +36,7 @@ class IssueCommentTable extends EntityTable
      */
     public function columnNameIssueCommentId()
     {
-        return 'IssueCommentId';
+        return 'issue_comment_id';
     }
 
     /**

@@ -3,10 +3,10 @@
 namespace EntityWranglerTest;
 
 use EntityWrangler\EntityTable;
-use EntityWranglerTest\EntityDescription\EmailAddress;
-use EntityWranglerTest\EntityDescription\User;
-use EntityWranglerTest\EntityDescription\Issue;
-use EntityWranglerTest\EntityDescription\IssueComment;
+use EntityWranglerTest\EntityDefinition\EmailAddressDefinition;
+use EntityWranglerTest\EntityDefinition\UserDefinition;
+use EntityWranglerTest\EntityDefinition\IssueDefinition;
+use EntityWranglerTest\EntityDefinition\IssueCommentDefinition;
 
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\DriverManager;
@@ -17,23 +17,18 @@ use EntityWranglerTest\Hydrator\UserWithIssuesWithCommentsHydrator;
 use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
 use EntityWranglerTest\Hydrator\IssueWithCommentsAndUserHydrator;
 
-use EntityWranglerTest\Model\UserWithIssues;
+use EntityWranglerTest\ModelComposite\UserWithIssues;
 use EntityWranglerTest\Table\UserTable;
 use EntityWranglerTest\Table\IssueTable;
 
 
 //use EntityWranglerTest\TableGateway\UserTableGateway;
-use Zend\Hydrator\Aggregate\AggregateHydrator;
-
-use EntityWranglerTest\TableGateway\IssueTableGateway;
-use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
-use EntityWranglerTest\TableGateway\UserTableGateway;
-use EntityWranglerTest\TableGateway\UserIssueTableGateway;
+use EntityWranglerTest\Model\User;
 
 
-use EntityWranglerTest\ZendHydrator\IssueHydrator;
-use EntityWranglerTest\ZendHydrator\UserHydrator;
-use EntityWranglerTest\ZendHydrator\UserIssueHydrator;
+
+
+use Ramsey\Uuid\Uuid;
 
 
 
@@ -47,120 +42,140 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function setup()
     {
         $this->injector = createTestInjector();
-        $this->buildDB();
+        //$this->buildDB();
+        
+        delegateTables($this->injector);
+        
+        setupDatabase($this->injector);
     }
 
-    public function delegateTables()
-    {
-        $userFn = function() {
-            $userDef = new User();
-            return UserTable::createFromDefinition($userDef);
-        };
 
-        $this->injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
-
-        $issueFn = function() {
-            $issueDef = new Issue();
-            return IssueTable::createFromDefinition($issueDef);
-        };
-
-        $this->injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
-    }
     
     public static function buildDB()
     {
         $conn = DriverManager::getConnection(['pdo' => new \PDO('sqlite:testing.sqlite')]);
-        $conn->exec("DROP TABLE IF EXISTS User;");
-        $conn->exec(
-          "CREATE TABLE User (
-            user_id INTEGER PRIMARY KEY,
-            first_name VARCHAR NOT NULL ,
-            last_name VARCHAR NOT NULL
-            );"
-        );
-
-        //$userId = $conn->lastInsertId();
-
-        $conn->exec("INSERT INTO User ('first_name', 'last_name') VALUES ('Dan','dman');");
-        $danUserId = $conn->lastInsertId();
-        
-        $conn->exec("INSERT INTO User ('first_name', 'last_name') VALUES ('Gordon','Smith');");
-        $gordonUserId = $conn->lastInsertId();
-        
-        $conn->exec("DROP TABLE IF EXISTS EmailAddress;");
-        $conn->exec(
-          "CREATE TABLE EmailAddress (
-            email_address_id INTEGER PRIMARY KEY,
-            user_id INTEGER NOT NULL,
-            address VARCHAR NOT NULL
-          );"
-        );
-
-        $conn->exec("INSERT INTO EmailAddress ('user_id', 'address') VALUES ('$danUserId','test@example.com');");
-        $emailAddressId = $conn->lastInsertId();
-
-        $conn->exec("DROP TABLE IF EXISTS IssuePriority;");
-        $conn->exec(
-          "CREATE TABLE IssuePriority (
-            issue_priority_id INTEGER PRIMARY KEY,
-            description VARCHAR NOT NULL
-          );"
-        );
-
-        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('low');");
-        $lowPriorityId = $conn->lastInsertId();
-
-        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('medium');");
-        $mediumPriorityId = $conn->lastInsertId();
-        
-        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('high');");
-        $highPriorityId = $conn->lastInsertId();
-
-        $conn->exec("DROP TABLE IF EXISTS Issue;");
-        $conn->exec(
-          "CREATE TABLE Issue (
-            issue_id INTEGER PRIMARY KEY,
-            description VARCHAR NOT NULL,
-            text VARCHAR NOT NULL,
-            user_id INTEGER NOT NULL,
-            issue_priority_id INTEGER NOT NULL
-          );"
-        );
-
-        $issueId = $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('issue the first', 'checking this works', $danUserId, $lowPriorityId);");
-        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('second issue', 'Lorem ipsum description', $danUserId, $mediumPriorityId);");
-        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $gordonUserId, $lowPriorityId);");
-
-
-        $conn->exec("DROP TABLE IF EXISTS IssueComments;");        
-        $conn->exec("DROP TABLE IF EXISTS IssueComment;");
-        $conn->exec(
-          "CREATE TABLE IssueComment (
-            issue_comment_id INTEGER PRIMARY KEY,
-            issue_id INTEGER NOT NULL,
-            text VARCHAR NOT NULL,
-            user_id INTEGER COMMENT 'The user that made this comment' NOT NULL
-          );"
-        );
-        
-        
-        $dataForIssueComments = [
-            [$issueId, "Help please", $danUserId], 
-            [$issueId, "what is the nature of the medical emergency", $gordonUserId],
+        //$conn->exec("DROP TABLE IF EXISTS User;");
+        $schemaManager = $conn->getSchemaManager();
+        $fromSchema = $schemaManager->createSchema();
+        $toSchema = new \Doctrine\DBAL\Schema\Schema();
+        //$toSchema = clone $fromSchema;
+        $knownEntities = [
+            \EntityWranglerTest\EntityDefinition\IssuePriorityDefinition::class,
+            \EntityWranglerTest\EntityDefinition\IssueCommentDefinition::class,
+            \EntityWranglerTest\EntityDefinition\IssueDefinition::class,
+            \EntityWranglerTest\EntityDefinition\UserDefinition::class,
+            \EntityWranglerTest\EntityDefinition\EmailAddressDefinition::class,
         ];
-        
-        foreach ($dataForIssueComments as $dataForIssueComment) {
 
-            $statement = $conn->prepare(
-                "INSERT INTO IssueComment (issue_id, text, user_id) VALUES (:issueId, :text, :user_id);"
-            );
+        foreach ($knownEntities as $knownEntity) {
+            $userTable = EntityTable::createFromDefinition(new $knownEntity());
+            $table = $toSchema->createTable($userTable->getName());
+            foreach ($userTable->getProperties() as $field) {
+                $table->addColumn($field->getDBName(), $field->type, ['length' => 255]);
+            }
             
-            $statement->bindParam('issueId', $dataForIssueComment[0], \PDO::PARAM_INT);
-            $statement->bindParam('text', $dataForIssueComment[1], \PDO::PARAM_STR);
-            $statement->bindParam('user_id', $dataForIssueComment[2], \PDO::PARAM_INT);
+//            charset 
+//            collation
+            //$myForeign->addForeignKeyConstraint
 
-            $statement->execute();
         }
+
+        $sqlArray = $fromSchema->getMigrateToSql($toSchema, $conn->getDatabasePlatform());
+        
+        var_dump($sqlArray);
+        
+        foreach ($sqlArray as $sql) {
+            $conn->exec($sql);
+        }
+
+        $userDan = User::create('Dan','dman');
+        $userGordon = User::create('Gordon','Smith');
+        
+        
+        exit(0);
+
+
+
+////        $conn->exec("INSERT INTO User ('first_name', 'last_name') VALUES ('Dan','dman');");
+////        $danUserId = $conn->lastInsertId();
+////        
+////        $conn->exec("INSERT INTO User ('first_name', 'last_name') VALUES ('Gordon','Smith');");
+////        $gordonUserId = $conn->lastInsertId();
+//        
+//        $conn->exec("DROP TABLE IF EXISTS EmailAddress;");
+//        $conn->exec(
+//          "CREATE TABLE EmailAddress (
+//            email_address_id INTEGER PRIMARY KEY,
+//            user_id INTEGER NOT NULL,
+//            address VARCHAR NOT NULL
+//          );"
+//        );
+//
+//        $conn->exec("INSERT INTO EmailAddress ('user_id', 'address') VALUES ('$danUserId','test@example.com');");
+//        $emailAddressId = $conn->lastInsertId();
+//
+//        $conn->exec("DROP TABLE IF EXISTS IssuePriority;");
+//        $conn->exec(
+//          "CREATE TABLE IssuePriority (
+//            issue_priority_id INTEGER PRIMARY KEY,
+//            description VARCHAR NOT NULL
+//          );"
+//        );
+//
+//        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('low');");
+//        $lowPriorityId = $conn->lastInsertId();
+//
+//        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('medium');");
+//        $mediumPriorityId = $conn->lastInsertId();
+//        
+//        $conn->exec("INSERT INTO IssuePriority (description) VALUES ('high');");
+//        $highPriorityId = $conn->lastInsertId();
+//
+//        $conn->exec("DROP TABLE IF EXISTS Issue;");
+//        $conn->exec(
+//          "CREATE TABLE Issue (
+//            issue_id INTEGER PRIMARY KEY,
+//            description VARCHAR NOT NULL,
+//            text VARCHAR NOT NULL,
+//            user_id INTEGER NOT NULL,
+//            issue_priority_id INTEGER NOT NULL
+//          );"
+//        );
+//
+//        $issueId = $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('issue the first', 'checking this works', $danUserId, $lowPriorityId);");
+//        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('second issue', 'Lorem ipsum description', $danUserId, $mediumPriorityId);");
+//        $conn->exec("INSERT INTO Issue (description, text, user_id, issue_priority_id) VALUES ('third issue', 'Lorem ipsum description adiahodiahoidhoadoiahdoiasdh', $gordonUserId, $lowPriorityId);");
+//
+//
+//        $conn->exec("DROP TABLE IF EXISTS IssueComments;");        
+//        $conn->exec("DROP TABLE IF EXISTS IssueComment;");
+//        $conn->exec(
+//          "CREATE TABLE IssueComment (
+//            issue_comment_id INTEGER PRIMARY KEY,
+//            issue_id INTEGER NOT NULL,
+//            text VARCHAR NOT NULL,
+//            user_id INTEGER COMMENT 'The user that made this comment' NOT NULL
+//          );"
+//        );
+//        
+//        
+//        $dataForIssueComments = [
+//            [$issueId, "Help please", $danUserId], 
+//            [$issueId, "what is the nature of the medical emergency", $gordonUserId],
+//        ];
+//        
+//        foreach ($dataForIssueComments as $dataForIssueComment) {
+//
+//            $statement = $conn->prepare(
+//                "INSERT INTO IssueComment (issue_id, text, user_id) VALUES (:issueId, :text, :user_id);"
+//            );
+//            
+//            $statement->bindParam('issueId', $dataForIssueComment[0], \PDO::PARAM_INT);
+//            $statement->bindParam('text', $dataForIssueComment[1], \PDO::PARAM_STR);
+//            $statement->bindParam('user_id', $dataForIssueComment[2], \PDO::PARAM_INT);
+//
+//            $statement->execute();
+//        }
 
 //        echo "Users ***************\n";
 //        $statement = $conn->query("select * from User;");
@@ -193,7 +208,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testSimplest()
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = EntityTable::createFromDefinition(new User());        
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());        
         $query->table($userTable);//->whereColumn('mockNoteID', 1);
         $contentArray = $query->fetch();
     }
@@ -203,7 +218,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $query = $this->injector->make('EntityWrangler\Query\Query');
         //$table = $this->injector->make('Entity\User');
 
-        $userTable = EntityTable::createFromDefinition(new User());        
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());        
         $query->table($userTable)->whereColumn('firstName', 'John');
         $contentArray = $query->fetch();
         $this->assertInternalType('array', $contentArray);
@@ -217,7 +232,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
         
-        $userTable = EntityTable::createFromDefinition(new User());     
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());  
         $emailAddressTable = EntityTable::createFromDefinition(new EmailAddress());
 
         $userEntity = $query->table($userTable)->whereColumn('firstName', 'Dan');
@@ -247,7 +262,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {   
         $query = $this->injector->make('EntityWrangler\Query\Query');
         
-        $userTable = EntityTable::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());
         $issueTable = EntityTable::createFromDefinition(new Issue());
         $issueCommentTable = EntityTable::createFromDefinition(new IssueComment());
 
@@ -273,7 +288,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testLimit()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = EntityTable::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());
         $userEntity = $query->table($userTable);
         $query->limit(1);
         $contentArray = $query->fetch();
@@ -288,7 +303,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function testOffset()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = EntityTable::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());
         $userEntity = $query->table($userTable);
         $query->offset(1);
         $contentArray = $query->fetch();
@@ -300,7 +315,7 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     function testOrder()
     {
         $query = $this->injector->make('EntityWrangler\Query\Query');
-        $userTable = EntityTable::createFromDefinition(new User());
+        $userTable = EntityTable::createFromDefinition(new UserDefinition());
         $userEntity = $query->table($userTable);
         $query->order($userEntity, 'user_id', 'DESC');
 
@@ -310,25 +325,21 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     }
 
 
-    /**
-     * @group magic
-     */
-    function testMagic()
-    {
-        $this->delegateTables();
-        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
-        $query->userTable()->whereFirstNameEquals('Dan');        
-        $contentArray = $query->fetch();
-    }
+//    /**
+//     * @group magic
+//     */
+//    function testMagic()
+//    {
+//        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
+//        $query->userTable()->whereFirstNameEquals('Dan');        
+//        $contentArray = $query->fetch();
+//    }
     
     /**
      * @group magic
      */
     function testMoreMagic()
     {
-        //https://zf2.readthedocs.io/en/latest/modules/zend.stdlib.hydrator.aggregate.html
-        $this->delegateTables();
-
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
         $query->userTable()->whereFirstNameEquals('Dan');
         $query->issueTable();
@@ -340,12 +351,34 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             $this->assertCount(2, $userWithIssues->issues);
         }
     }
-    
+
+    /**
+     * @group magic
+     */
+    function testUserLoad()
+    {
+        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
+        $query->userTable()->whereColumn('firstName', 'Dan');
+        $result = $query->fetchAsUsers();
+        $this->assertCount(1, $result);
+        foreach ($result as $user) {
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertEquals('dman', $user->getLastName());
+        }
+    }
+
+    /**
+     * @group magic
+     */
     function testSave()
     {
-        $this->delegateTables();
+        $user = User::create(
+            "marky",
+            "mark"
+        );
+
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
-        $query->createUser();
+        $query->saveUser($user);
     }
     
 }

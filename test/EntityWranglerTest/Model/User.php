@@ -1,43 +1,51 @@
-<?php
+<?php 
 
 namespace EntityWranglerTest\Model;
 
+use Ramsey\Uuid\Uuid;
+
 class User
 {
-    public $userId;
-    
-    public $firstName;
-    
-    public $lastName;
 
-    function __construct($userId, $firstName, $lastName)
+    public $userId = null;
+
+    public $firstName = null;
+
+    public $lastName = null;
+
+    public function __construct($userId, $firstName, $lastName)
     {
         $this->userId = $userId;
         $this->firstName = $firstName;
         $this->lastName = $lastName;
     }
 
-    /**
-     * @return mixed
-     */
+    public static function create($firstName, $lastName)
+    {
+        $uuid4 = UUID::uuid4();
+        $instance = new self(
+            $uuid4->toString(),
+            $firstName,
+            $lastName
+        );
+
+        return $instance;
+    }
+
     public function getUserId()
     {
         return $this->userId;
     }
 
-    /**
-     * @return mixed
-     */
     public function getFirstName()
     {
         return $this->firstName;
     }
 
-    /**
-     * @return mixed
-     */
     public function getLastName()
     {
         return $this->lastName;
     }
+
+
 }

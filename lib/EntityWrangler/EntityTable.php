@@ -32,13 +32,17 @@ class EntityTable
     public $objectName = null;
 
     /**
+     * 
+     * You almost certainly don't want to call this directly, instead go through 
+     * the createFromDefinition factory method.
+     * 
      * @param $name
      * @param $schemaName
      * @param $fields EntityProperty[]
      * @param $relations
      * @param $indexes
      */
-    public function __construct(
+    protected function __construct(
         $name,
         $schemaName,
         $fields,
@@ -62,13 +66,13 @@ class EntityTable
         $fields = [];
         $tableName = $definition->getTableInfo();
         $fields[] = new EntityProperty(
-            snakify($tableName->tableName).'_id',
-            'primary',
-            'Primary key',
-            ['autoInc' => true]
+            lcfirst($tableName->tableName).'Id',
+            'identity',
+            'Identity key',
+            snakify($tableName->tableName).'_id'
         );
 
-        $fields = array_merge($fields, $definition->getFields());
+        $fields = array_merge($fields, $definition->getProperties());
         $instance = new static(
             $tableName->tableName,
             'test',
@@ -92,9 +96,9 @@ class EntityTable
     }
 
     /**
-     * @return mixed
+     * @return EntityProperty[]
      */
-    public function getFields()
+    public function getProperties()
     {
         return $this->fields;
     }
@@ -142,15 +146,18 @@ class EntityTable
     /**
      * @return string
      */
-    function getPrimaryColumnName()
+    function getIdentityColumnName()
     {
-        foreach($this->fields as $field){
-            if ($field->type === 'primary') {
-                return $field->getName();
+        foreach($this->fields as $field) {
+            if ($field->type === 'identity') {
+                return $field->getDBName();
             }
         }
         throw new EntityWranglerException("Entity has no primary column.");
     }
+    
+
+    
 
 //    /**
 //     * @return Relation|null

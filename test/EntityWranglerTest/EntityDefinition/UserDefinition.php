@@ -1,21 +1,28 @@
 <?php
 
 
-namespace EntityWranglerTest\EntityDescription;
+namespace EntityWranglerTest\EntityDefinition;
 
 
-use EntityWrangler\Definition\EntityProperty;
+
 use EntityWrangler\EntityDefinition;
+use EntityWrangler\Definition\EntityIdentity;
+use EntityWrangler\Definition\EntityProperty;
 use EntityWrangler\Definition\TableInfo;
 
-class User implements EntityDefinition
+class UserDefinition implements EntityDefinition
 {
+    public static function getIdentity()
+    {
+        return new EntityIdentity('userId', 'user_id');
+    }
+    
     public static function getTableInfo()
     {
         return new TableInfo('dja', 'User');
     }
 
-    public static function getFields()
+    public static function getProperties()
     {
         $fields = [];
         $fields[] = new EntityProperty('firstName', 'string', 'The user\'s first name');

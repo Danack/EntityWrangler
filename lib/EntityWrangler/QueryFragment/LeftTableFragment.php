@@ -33,6 +33,7 @@ class LeftTableFragment implements QueryFragment
     public function joinBit(Query $query) { }
     public function offsetBit(Query $query) { }
     public function onBit(Query $query) { }
+    public function orderBit(Query $query) { }
     public function randBit(Query $query, &$tableMap) { }
     public function whereBit(Query $query) { }
     public function limitBit(Query $query) { }
@@ -62,9 +63,9 @@ class LeftTableFragment implements QueryFragment
             $condition = sprintf(
                 '%s.%s = %s.%s',
                 $this->queriedJoinTableMap->getAlias(),
-                $this->queriedJoinTableMap->getPrimaryColumnName(),
+                $this->queriedJoinTableMap->getIdentityColumnName(),
                 $this->queriedEntity->getAlias(),
-                $this->queriedEntity->getPrimaryColumnName()
+                $this->queriedEntity->getIdentityColumnName()
             );
             
             return $queryBuilder->leftJoin(

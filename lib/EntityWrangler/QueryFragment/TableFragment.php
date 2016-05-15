@@ -55,21 +55,19 @@ class TableFragment implements QueryFragment
 
     public function findJoiningColumn(QueriedTable $queriedEntity, QueriedTable $queriedJoinTableMap)
     {
-        $primaryColumnName = $queriedJoinTableMap->getPrimaryColumnName();
+        $identityColumnName = $queriedJoinTableMap->getIdentityColumnName();
 
         foreach ($queriedEntity->getColumns() as $column) {
-            if ($column->getName() == $primaryColumnName) {
-                return $column->getName();
+            if ($column->getDBName() == $identityColumnName) {
+                return snakify($column->getName());
             }
         }
 
         foreach ($queriedEntity->getRelations() as $relation) {
-            if ($relation->fieldName.'_id' == $primaryColumnName) {
-                return $primaryColumnName;
+            if ($relation->dbName == $identityColumnName) {
+                return snakify($identityColumnName);
             }
         }
-
-
 
         throw new EntityWranglerException("Failed to find joining column to join ".$queriedEntity->getTableName()." with ".$queriedJoinTableMap->getTableName());
     }
@@ -89,12 +87,12 @@ class TableFragment implements QueryFragment
                 $condition = sprintf(
                     '%s.%s = %s.%s',
                     $this->queriedJoinTableMap->getAlias(),
-                    $this->queriedJoinTableMap->getPrimaryColumnName(),
+                    $this->queriedJoinTableMap->getIdentityColumnName(),
                     $this->queriedEntity->getAlias(),
                     $joiningColumn
                 );
                 
-                return $queryBuilder->leftJoin(
+                return $queryBuilder->innerJoin(
                     $this->queriedJoinTableMap->getAlias(),
                     $this->queriedEntity->getTableName(),
                     $this->queriedEntity->getAlias(),

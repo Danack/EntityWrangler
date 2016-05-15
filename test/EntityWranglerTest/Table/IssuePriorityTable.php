@@ -16,7 +16,7 @@ class IssuePriorityTable extends EntityTable
      */
     public function columnNameIssuePriorityId()
     {
-        return 'IssuePriorityId';
+        return 'issue_priority_id';
     }
 
     /**

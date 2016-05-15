@@ -7,6 +7,8 @@ use EntityWrangler\Query\Query;
 use EntityWrangler\QueryFragment;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
 use EntityWrangler\Query\QueriedTable;
+use EntityWranglerTest\Model\IssuePriority;
+use EntityWranglerTest\Table\IssuePriorityTable;
 
 class InsertFragment implements QueryFragment
 {
@@ -21,22 +23,22 @@ class InsertFragment implements QueryFragment
         $this->tableMap = $tableMap;
         $this->data = $data;
     }
-    
+
     public function insertBit(Query $query)
     {
         $values = [];
-        $params = [];
-        
+        $paramsForValues = [];
         foreach ($this->tableMap->getColumns() as $column) {
-            $values[$column->getName()] = '?';
-            $params[$column->getName()] = $this->data[$column->getName()];
+            $snakeName = snakify($column->getName());
+            $values[$snakeName] = '?';
+            $paramsForValues[] = $this->data[$snakeName];
         }
-        
-        $fn = function (DBALQueryBuilder $queryBuilder) use ($values, $params) { 
+
+        $fn = function (DBALQueryBuilder $queryBuilder) use ($values, $paramsForValues) {
             return $queryBuilder
               ->insert($this->tableMap->getAlias())
               ->values($values)
-              ->setParameters($params);
+              ->setParameters($paramsForValues);
         };
         
         return $fn;

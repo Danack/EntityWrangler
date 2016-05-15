@@ -2,9 +2,13 @@
 
 namespace EntityWrangler\Definition;
 
-class EntityProperty
+class EntityProperty implements EntityField
 {
+    /** @var string The property name in a class */
     public $name;
+    
+    /** @var  string The property name as stored in a DB */
+    public $dbName;
 
     public $type;
 
@@ -18,16 +22,34 @@ class EntityProperty
     // e.g. when doing an insert, and the datetime column has default of now().
     const DATA_TYPE_NONE        = 'none';
 
-    function __construct($name, $type, $description)
+    function __construct($name, $type, $description, $dbName = null)
     {
+        if ($dbName === null) {
+            $dbName = snakify($name);
+        }
+
         $this->name = $name;
         $this->type = $type;
         $this->description = $description;
+        $this->dbName = $dbName;
     }
-    
+
     public function getName()
     {
         return $this->name;
+    }
+
+    public function getPropertyName()
+    {
+        return $this->name;
+    }
+    
+    /**
+     * @return string
+     */
+    public function getDBName()
+    {
+        return $this->dbName;
     }
 
     /**

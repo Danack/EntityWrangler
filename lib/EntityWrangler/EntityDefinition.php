@@ -9,11 +9,14 @@ namespace EntityWrangler;
  */
 interface EntityDefinition
 {
+    /** @return \EntityWrangler\Definition\EntityIdentity */
+    public static function getIdentity();
+    
     /** @return \EntityWrangler\Definition\TableInfo */
     public static function getTableInfo();
     
     /** @return \EntityWrangler\Definition\EntityProperty[] */
-    public static function getFields();
+    public static function getProperties();
     
     public static function getIndexes();
     

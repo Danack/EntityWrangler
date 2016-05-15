@@ -20,7 +20,7 @@ class TableColumns
             snakify($idName)
         );
 
-        foreach ($entityDefinition->getFields() as $field) {
+        foreach ($entityDefinition->getProperties() as $field) {
             $instance->columns[] = new TableColumn(
                 $field->getName(),
                 $field->type,

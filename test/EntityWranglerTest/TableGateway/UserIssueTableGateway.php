@@ -4,7 +4,7 @@ namespace EntityWranglerTest\TableGateway;
 
 use EntityWranglerTest\Model\User;
 use Zend\Hydrator\Aggregate\AggregateHydrator;
-use EntityWranglerTest\Model\UserWithIssues;
+use EntityWranglerTest\ModelComposite\UserWithIssues;
 use EntityWranglerTest\TableGateway\IssueTableGateway;
 use EntityWranglerTest\TableGateway\UserTableGateway;
 
@@ -43,6 +43,11 @@ class UserIssueTableGateway
         foreach ($users as $user) {
             $filteredData = $this->userTableGateway->filterDataByUserId($this->data, $user->userId);
             $issues = $this->issueTableGateway->findAllByUserId($filteredData);
+            
+            echo "Issue";
+            var_dump($filteredData);
+            exit(0);
+            
             $userWithIssues = new UserWithIssues($user, $issues);
             $userWithIssueList[] = $userWithIssues;
         }

@@ -16,7 +16,7 @@ class IssueTable extends EntityTable
      */
     public function columnNameUserId()
     {
-        return 'userId';
+        return 'user_id';
     }
 
     /**
@@ -26,7 +26,7 @@ class IssueTable extends EntityTable
      */
     public function columnNameIssueId()
     {
-        return 'IssueId';
+        return 'issue_id';
     }
 
     /**

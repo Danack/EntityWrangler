@@ -3,7 +3,6 @@
 namespace EntityWranglerTest\TableGateway;
 
 use EntityWranglerTest\Model\User;
-use Zend\Hydrator\Aggregate\AggregateHydrator;
 use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
 use EntityWranglerTest\Magic\MoreMagic;
 

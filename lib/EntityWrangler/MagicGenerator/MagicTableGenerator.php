@@ -33,7 +33,7 @@ class MagicTableGenerator
 
     public function addColumn(TableColumn $column)
     {
-        $columnName = $column->getName();
+        $columnName = $column->getDbName();
         $body = "return '$columnName';";
         $docBlockTags = [
             new ReturnTag('string')
@@ -49,7 +49,6 @@ class MagicTableGenerator
             MethodGenerator::FLAG_PUBLIC,
             $body,
             $docBlock
-            
         );
 
         $this->classGenerator->addMethodFromGenerator($method);
@@ -62,17 +61,17 @@ class MagicTableGenerator
         $this->classGenerator->setExtendedClass('EntityTable');
         $this->classGenerator->addUse('EntityWrangler\EntityTable');
         $this->classGenerator->addUse('EntityWrangler\Query\Query');
-        $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
+        $this->classGenerator->addUse('EntityWrangler\Query\QueriedTable');
     }
 
     public function setupQueriedClass(EntityDefinition $entityDefinition)
     {
         $name = 'Queried'.$entityDefinition->getTableInfo()->tableName.'Table';
         $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Table');
-        $this->classGenerator->setExtendedClass('QueriedEntity');
+        $this->classGenerator->setExtendedClass('QueriedTable');
         $this->classGenerator->addUse('EntityWrangler\EntityTable');
         $this->classGenerator->addUse('EntityWrangler\Query\Query');
-        $this->classGenerator->addUse('EntityWrangler\Query\QueriedEntity');
+        $this->classGenerator->addUse('EntityWrangler\Query\QueriedTable');
     }
 
     public function generate(EntityDefinition $entityDefinition)
@@ -132,7 +131,6 @@ class MagicTableGenerator
         }
         $this->save($entityDefinition->getTableInfo());
     }
-    
     
     private function save(TableInfo $tableInfo)
     {

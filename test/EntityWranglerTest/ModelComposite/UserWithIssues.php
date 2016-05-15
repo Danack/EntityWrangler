@@ -1,6 +1,9 @@
 <?php
 
-namespace EntityWranglerTest\Model;
+namespace EntityWranglerTest\ModelComposite;
+
+use EntityWranglerTest\Model\Issue;
+use EntityWranglerTest\Model\User;
 
 class UserWithIssues
 {

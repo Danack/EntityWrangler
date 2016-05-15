@@ -7,7 +7,6 @@ use EntityWrangler\Query\Query;
 
 interface QueryFragment
 {
-    
     public function insertBit(Query $query);
     public function joinBit(Query $query);
     public function limitBit(Query $query);

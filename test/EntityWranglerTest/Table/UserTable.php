@@ -16,7 +16,7 @@ class UserTable extends EntityTable
      */
     public function columnNameUserId()
     {
-        return 'UserId';
+        return 'user_id';
     }
 
     /**
@@ -26,7 +26,7 @@ class UserTable extends EntityTable
      */
     public function columnNameFirstName()
     {
-        return 'firstName';
+        return 'first_name';
     }
 
     /**
@@ -36,7 +36,7 @@ class UserTable extends EntityTable
      */
     public function columnNameLastName()
     {
-        return 'lastName';
+        return 'last_name';
     }
 
 

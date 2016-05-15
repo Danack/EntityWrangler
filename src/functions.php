@@ -1,5 +1,6 @@
 <?php
 
+use EntityWrangler\EntityDefinition;
 use EntityWranglerTest\Hydrator\HydratorException;
 
 function snakify($word)
@@ -76,3 +77,24 @@ function formatSQL($sql)
 
     return str_replace(array_keys($searchReplace), $searchReplace, $sql);
 }
+
+
+/**
+ * @param EntityDefinition $entityDefinition
+ * @return \EntityWrangler\Definition\EntityField[]
+ */
+function getAllEntityFields(EntityDefinition $entityDefinition, $includeIdentity)
+{    
+    $properties = $entityDefinition->getProperties();
+    $relations = $entityDefinition->getRelations();
+
+    $fields = array_merge($properties, $relations);
+    
+    if ($includeIdentity) {
+        $fields = array_merge([$entityDefinition->getIdentity()], $fields);
+    }
+    
+    return $fields;
+}
+
+

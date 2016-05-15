@@ -1,6 +1,7 @@
 <?php
 
 use Auryn\Injector;
+use EntityWrangler\MagicGenerator\MagicModelGenerator;
 
 $autoloader = require(__DIR__.'/../vendor/autoload.php');
 
@@ -12,12 +13,14 @@ $injector = new Injector();
 $injectionParams->addToInjector($injector);
 $injector->share($injector);
 
+
+
 $descriptions = [
-    'EntityWranglerTest\EntityDescription\EmailAddress',
-    'EntityWranglerTest\EntityDescription\Issue',
-    'EntityWranglerTest\EntityDescription\IssueComment',
-    'EntityWranglerTest\EntityDescription\IssuePriority',
-    'EntityWranglerTest\EntityDescription\User',
+    'EntityWranglerTest\EntityDefinition\EmailAddressDefinition',
+    'EntityWranglerTest\EntityDefinition\IssueDefinition',
+    'EntityWranglerTest\EntityDefinition\IssueCommentDefinition',
+    'EntityWranglerTest\EntityDefinition\IssuePriorityDefinition',
+    'EntityWranglerTest\EntityDefinition\UserDefinition',
 ];
 
 
@@ -26,6 +29,15 @@ foreach ($descriptions as $description) {
     $descriptionObject = new $description();
     $tableGenerator->generate($descriptionObject);
 }
+
+$savePath = $injector->make('EntityWrangler\SavePath');
+
+foreach ($descriptions as $description) {
+    $descriptionObject = new $description();
+    $modelGenerator = new MagicModelGenerator($savePath, $descriptionObject);
+    $modelGenerator->generate();
+}
+
 
 $queryGenerator = $injector->make('EntityWrangler\MagicGenerator\MagicQueryGenerator');
 foreach ($descriptions as $description) {

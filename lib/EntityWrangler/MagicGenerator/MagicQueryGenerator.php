@@ -12,6 +12,7 @@ use Zend\Code\Generator\DocBlock\Tag;
 use Zend\Code\Generator\DocBlock\Tag\ParamTag;
 use Zend\Code\Generator\DocBlock\Tag\ReturnTag;
 use Zend\Code\Generator\PropertyGenerator;
+use Zend\Code\Generator\PropertyValueGenerator;
 use Zend\Code\Generator\TypeGenerator;
 use Zend\Code\Generator\ValueGenerator;
 
@@ -51,10 +52,17 @@ class MagicQueryGenerator
             '%TABLE_NAME%' => $tableName,
         ];
         
+        $bodyString = <<< 'END'
+$queriedTable = $this->table($this->%TABLE_NAME%, %QUERIED_TABLE_NAME%::class, $joinEntity);
+//This name is not dynamic enough - one table can be queried multiple times.
+$this->queriedTables['%TABLE_NAME%Queried'] = $queriedTable;
+return $queriedTable;
+END;
+        
         $body = str_replace(
             array_keys($names),
             $names,
-            'return $this->table($this->%TABLE_NAME%, %QUERIED_TABLE_NAME%::class, $joinEntity);'
+            $bodyString
         );
 
         $docBlockTags = [
@@ -68,9 +76,7 @@ class MagicQueryGenerator
             null, 
             $docBlockTags
         );
-        
-        
-        
+
         $params = [
             new ParameterGenerator(
                 'joinEntity', 
@@ -101,8 +107,13 @@ class MagicQueryGenerator
         $this->classGenerator->addUse('EntityWranglerTest\Table\UserTable');
         $this->classGenerator->addUse('Doctrine\DBAL\Query\QueryBuilder', 'DBALQueryBuilder');
 
+        $propertyValue = new PropertyValueGenerator([]);
+        
+        $property = new PropertyGenerator('queriedTables', $propertyValue);
+        $this->classGenerator->addPropertyFromGenerator($property);
+        
+        
         foreach ($this->entities as $entity) {
-            
             $tableFQCN = sprintf( 
                 'EntityWranglerTest\Table\%sTable',
                 $entity->getName()

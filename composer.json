@@ -30,10 +30,11 @@
         "rdlowrey/auryn": "~1.4"
     },
     "require":{
+        
         "danack/danack-code": "~2.4.4",
         "doctrine/dbal": "~2.5.4",
         "php": "~5.5 | ~7",
-        "zendframework/zend-hydrator": "~2.2",
+        "ramsey/uuid": "3.4.1",
         "zendframework/zend-code": "^3.0"
     }
 }
