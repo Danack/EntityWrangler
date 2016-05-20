@@ -32,6 +32,27 @@ class User
         return $instance;
     }
 
+    public function toData()
+    {
+        $data = [];
+        $data['user_id'] = $this->userId;
+        $data['first_name'] = $this->firstName;
+        $data['last_name'] = $this->lastName;
+
+        return $data;
+    }
+
+    public static function fromData($data)
+    {
+        $instance = new self(
+            $data['user_id'],
+            $data['first_name'],
+            $data['last_name']
+        );
+
+        return $instance;
+    }
+
     public function getUserId()
     {
         return $this->userId;

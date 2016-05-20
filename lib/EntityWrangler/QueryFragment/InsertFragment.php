@@ -29,9 +29,9 @@ class InsertFragment implements QueryFragment
         $values = [];
         $paramsForValues = [];
         foreach ($this->tableMap->getColumns() as $column) {
-            $snakeName = snakify($column->getName());
-            $values[$snakeName] = '?';
-            $paramsForValues[] = $this->data[$snakeName];
+            $dbName = $column->getDbName();
+            $values[$dbName] = '?';
+            $paramsForValues[] = $this->data[$dbName];
         }
 
         $fn = function (DBALQueryBuilder $queryBuilder) use ($values, $paramsForValues) {

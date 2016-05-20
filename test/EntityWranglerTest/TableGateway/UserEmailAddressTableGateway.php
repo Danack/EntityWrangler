@@ -3,34 +3,35 @@
 namespace EntityWranglerTest\TableGateway;
 
 use EntityWranglerTest\Model\User;
-use EntityWranglerTest\ModelComposite\UserWithIssues;
-use EntityWranglerTest\TableGateway\IssueTableGateway;
-use EntityWranglerTest\TableGateway\UserTableGateway;
 
-class UserIssueTableGateway
+use EntityWranglerTest\Model\UserWithEmailAddress;
+use EntityWranglerTest\Model\UserWithEmailAddresses;
+
+
+class UserEmailAddressTableGateway
 {
     private $data;
 
     /** @var  UserTableGateway */
     private $userTableGateway;
 
-    /** @var IssueTableGateway */
-    private $issueTableGateway;
+    /** @var EmailAddressTableGateway */
+    private $emailAddressTableGateway;
 
     public static function fromResultSet(
-        IssueTableGateway $issueTableGateway,
+        EmailAddressTableGateway $emailAddressTableGateway,
         UserTableGateway $userTableGateway,
         array $data
     ) {
         $instance = new self();
         $instance->data = $data;
         $instance->userTableGateway = $userTableGateway;
-        $instance->issueTableGateway = $issueTableGateway;
+        $instance->emailAddressTableGateway = $emailAddressTableGateway;
 
         return $instance;
     }
 
-    /** @return UserWithIssues[] */
+    /** @return UserWithEmailAddresses[] */
     public function fetchAll()
     {
         $userWithIssueList = [];
@@ -38,8 +39,8 @@ class UserIssueTableGateway
 
         foreach ($users as $user) {
             $filteredData = $this->userTableGateway->filterDataByUserId($this->data, $user->userId);
-            $issues = $this->issueTableGateway->findAllByUserId($filteredData);
-            $userWithIssues = new UserWithIssues($user, $issues);
+            $emails = $this->emailAddressTableGateway->findAllByUserId($filteredData);
+            $userWithIssues = new UserWithEmailAddresses($user, $emails);
             $userWithIssueList[] = $userWithIssues;
         }
 

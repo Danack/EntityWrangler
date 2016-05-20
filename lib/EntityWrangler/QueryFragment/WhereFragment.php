@@ -53,6 +53,8 @@ class WhereFragment implements QueryFragment
             
             $pdoType = $pdoTypes[$this->sqlType];
             $namedParam = $dbalQueryBuilder->createNamedParameter($this->value, $pdoType);
+            
+            $this->whereCondition = ucfirst($this->whereCondition);
             $dbalQueryBuilder->where(
                 $this->whereCondition.' '.$namedParam
             );

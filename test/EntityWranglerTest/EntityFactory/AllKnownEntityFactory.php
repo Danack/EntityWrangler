@@ -21,11 +21,16 @@ class AllKnownEntityFactory
     
     public function create(array $data, $type)
     {
-        if (array_key_exists($type, $this->entityFactories) === false) {
-            throw new EntityWranglerException("No factory registered for type '$type'.");
+        if (array_key_exists($type, $this->entityFactories) === true) {
+            $entityFactory = $this->entityFactories[$type];
+            return $entityFactory->create($data);
         }
 
-        $entityFactory = $this->entityFactories[$type];
-        return $entityFactory->create($data);   
+        $reflClass = new \ReflectionClass($type);
+        if ($reflClass->hasMethod('fromData') === true) {
+            return $type::fromData($data);
+        }
+
+        throw new EntityWranglerException("No factory registered for type '$type'.");
     }
 }

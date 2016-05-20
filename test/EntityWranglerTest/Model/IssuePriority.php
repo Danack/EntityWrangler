@@ -28,6 +28,25 @@ class IssuePriority
         return $instance;
     }
 
+    public function toData()
+    {
+        $data = [];
+        $data['issue_priority_id'] = $this->issuePriorityId;
+        $data['description'] = $this->description;
+
+        return $data;
+    }
+
+    public static function fromData($data)
+    {
+        $instance = new self(
+            $data['issue_priority_id'],
+            $data['description']
+        );
+
+        return $instance;
+    }
+
     public function getIssuePriorityId()
     {
         return $this->issuePriorityId;

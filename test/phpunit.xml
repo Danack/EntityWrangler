@@ -20,11 +20,11 @@
     </filter>
     -->
     
-    <groups>
+    <!-- <groups>
         <include>
-            <group>magic</group>
+            <group>magicsave</group>
         </include>
-    </groups>
+    </groups> -->
 
     <listeners>
         <!-- <listener class="\Mockery\Adapter\Phpunit\TestListener"/> -->

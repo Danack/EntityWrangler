@@ -45,8 +45,8 @@ class TableFragment implements QueryFragment
         foreach ($this->queriedEntity->getColumns() as $column) {
             $fields[] = sprintf(
                 '%s.%s as %s_%s',
-                $this->queriedEntity->getTableName(), snakify($column->name),
-                $this->queriedEntity->getAlias(), snakify($column->name)
+                $this->queriedEntity->getTableName(), $column->getDbName(),
+                $this->queriedEntity->getAlias(), $column->getDbName()
             );
         }
 
@@ -59,15 +59,15 @@ class TableFragment implements QueryFragment
 
         foreach ($queriedEntity->getColumns() as $column) {
             if ($column->getDBName() == $identityColumnName) {
-                return snakify($column->getName());
+                return $column->getDbName();
             }
         }
 
-        foreach ($queriedEntity->getRelations() as $relation) {
-            if ($relation->dbName == $identityColumnName) {
-                return snakify($identityColumnName);
-            }
-        }
+//        foreach ($queriedEntity->getRelations() as $relation) {
+//            if ($relation->dbName == $identityColumnName) {
+//                return snakify($identityColumnName);
+//            }
+//        }
 
         throw new EntityWranglerException("Failed to find joining column to join ".$queriedEntity->getTableName()." with ".$queriedJoinTableMap->getTableName());
     }
@@ -100,9 +100,12 @@ class TableFragment implements QueryFragment
                 );
             }
 
+            $tableName = $this->queriedEntity->getTableName();
+            $alias = $this->queriedEntity->getAlias();
+
             return $queryBuilder->from(
-                $this->queriedEntity->getTableName(),
-                $this->queriedEntity->getAlias()
+                $tableName,
+                $alias
             );
         };
         

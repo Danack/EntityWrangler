@@ -36,6 +36,29 @@ class IssueComment
         return $instance;
     }
 
+    public function toData()
+    {
+        $data = [];
+        $data['issue_comment_id'] = $this->issueCommentId;
+        $data['text'] = $this->text;
+        $data['issue_id'] = $this->issueId;
+        $data['user_id'] = $this->userID;
+
+        return $data;
+    }
+
+    public static function fromData($data)
+    {
+        $instance = new self(
+            $data['issue_comment_id'],
+            $data['text'],
+            $data['issue_id'],
+            $data['user_id']
+        );
+
+        return $instance;
+    }
+
     public function getIssueCommentId()
     {
         return $this->issueCommentId;

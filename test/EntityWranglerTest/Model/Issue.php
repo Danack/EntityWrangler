@@ -36,6 +36,29 @@ class Issue
         return $instance;
     }
 
+    public function toData()
+    {
+        $data = [];
+        $data['issue_id'] = $this->issueId;
+        $data['description'] = $this->description;
+        $data['text'] = $this->text;
+        $data['user_id'] = $this->userId;
+
+        return $data;
+    }
+
+    public static function fromData($data)
+    {
+        $instance = new self(
+            $data['issue_id'],
+            $data['description'],
+            $data['text'],
+            $data['user_id']
+        );
+
+        return $instance;
+    }
+
     public function getIssueId()
     {
         return $this->issueId;

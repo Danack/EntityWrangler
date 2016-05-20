@@ -14,7 +14,7 @@ class EmailAddressDefinition implements EntityDefinition
 {
     public static function getIdentity()
     {
-        return new EntityIdentity('issueId', 'issue_id');
+        return new EntityIdentity('emailAddressId', 'email_address_id');
     }
     
     public static function getTableInfo()

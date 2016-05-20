@@ -58,6 +58,8 @@ class MagicModelGenerator
         // ---------------
         $this->generateConstructor();
         $this->addCreateMethod();
+        $this->addToDataMethod();
+        $this->addFromDataMethod();
         
 
         $entityFields = getAllEntityFields($this->entityDefinition, true);
@@ -109,7 +111,73 @@ class MagicModelGenerator
 
         $this->classGenerator->addMethodFromGenerator($method);
     }
-        
+
+    
+    private function addToDataMethod()
+    {
+        $body = <<< 'END'
+$data = [];
+%s
+
+return $data;
+END;
+
+        $entityFields = getAllEntityFields($this->entityDefinition, true);
+        $lines = [];
+
+        foreach ($entityFields as $entityField) {
+            $line = sprintf(
+                '$data[\'%s\'] = $this->%s;',
+                $entityField->getDbName(),
+                $entityField->getPropertyName()
+            );
+            $lines[] = $line;
+        }
+
+        $method = new MethodGenerator(
+            'toData',
+            [],
+            MethodGenerator::FLAG_PUBLIC,
+            sprintf($body, implode("\n", $lines))
+        );
+
+        $this->classGenerator->addMethodFromGenerator($method);
+    }
+    
+    
+    
+    
+    private function addFromDataMethod()
+    {
+        $body = <<< 'END'
+
+$instance = new self(
+    %s
+);
+
+return $instance;
+END;
+
+        $params = [
+            new ParameterGenerator('data')
+        ];
+        $names = [];
+        $entityFields = getAllEntityFields($this->entityDefinition, true);
+        foreach ($entityFields as $entityField) {
+            $names[] = '$data[\''.$entityField->getDbName().'\']';
+        }
+
+        $method = new MethodGenerator(
+            'fromData',
+            $params,
+            MethodGenerator::FLAG_PUBLIC | MethodGenerator::FLAG_STATIC,
+            sprintf($body, implode(",\n    ", $names))
+        );
+
+        $this->classGenerator->addMethodFromGenerator($method);
+    }
+
+
 
     private function addCreateMethod()
     {

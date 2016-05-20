@@ -2,10 +2,11 @@
 
 namespace EntityWranglerTest\TableGateway;
 
-use EntityWranglerTest\Model\Issue;
+use EntityWranglerTest\Model\EmailAddress;
 use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
 
-class IssueTableGateway
+class EmailAddressTableGateway
+
 {
     private $data;
     private $prefix;
@@ -33,7 +34,7 @@ class IssueTableGateway
             $values = getPrefixedData($content, $this->prefix);
             $issues[] = $this->allKnownEntityFactory->create(
                 $values, 
-                Issue::class
+                EmailAddress::class
             );
         }
 
@@ -48,7 +49,7 @@ class IssueTableGateway
             $values = getPrefixedData($content, $this->prefix);
             $issues[] = $this->allKnownEntityFactory->create(
                 $values, 
-                Issue::class
+                EmailAddress::class
             );
         }
 

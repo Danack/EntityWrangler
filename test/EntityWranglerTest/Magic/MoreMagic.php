@@ -4,13 +4,9 @@ namespace EntityWranglerTest\Magic;
 
 use EntityWrangler\Query\Query;
 use EntityWrangler\SafeAccess;
-use EntityWranglerTest\Model\IssuePriority;
-use EntityWranglerTest\Table\IssueTable;
-use EntityWranglerTest\Table\UserTable;
+
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
-use EntityWranglerTest\Table\QueriedUserTable;
-use EntityWranglerTest\Table\QueriedIssueTable;
-use EntityWranglerTest\Table\QueriedIssuePriorityTable;
+
 
 use EntityWrangler\EntityTable;
 use EntityWranglerTest\EntityDefinition\EmailAddressDefinition;
@@ -22,18 +18,36 @@ use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\DriverManager;
 use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
 use EntityWranglerTest\ModelComposite\UserWithIssues;
-use EntityWranglerTest\TableGateway\IssueTableGateway;
-use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
-use EntityWranglerTest\TableGateway\UserTableGateway;
-use EntityWranglerTest\TableGateway\UserIssueTableGateway;
+
 use EntityWranglerTest\EntityFactory\AllKnownEntityFactory;
 use EntityWranglerTest\Magic\MagicQuery;
-use EntityWranglerTest\Table\IssuePriorityTable;
+use EntityWranglerTest\TableGateway\EmailAddressTableGateway;
+use EntityWranglerTest\TableGateway\IssueTableGateway;
+use EntityWranglerTest\TableGateway\IssueCommentTableGateway;
+use EntityWranglerTest\TableGateway\UserEmailAddressTableGateway;
+use EntityWranglerTest\TableGateway\UserTableGateway;
+use EntityWranglerTest\TableGateway\UserIssueTableGateway;
 
+
+use EntityWranglerTest\Model\EmailAddress;
 use EntityWranglerTest\Model\Issue;
+use EntityWranglerTest\Model\IssueComment;
+use EntityWranglerTest\Model\IssuePriority;
 use EntityWranglerTest\Model\User;
 
 
+use EntityWranglerTest\Table\EmailAddressTable;
+use EntityWranglerTest\Table\IssueTable;
+use EntityWranglerTest\Table\IssueCommentTable;
+use EntityWranglerTest\Table\IssuePriorityTable;
+use EntityWranglerTest\Table\UserTable;
+
+
+use EntityWranglerTest\Table\QueriedEmailAddressTable;
+use EntityWranglerTest\Table\QueriedIssueTable;
+use EntityWranglerTest\Table\QueriedIssueCommentTable;
+use EntityWranglerTest\Table\QueriedIssuePriorityTable;
+use EntityWranglerTest\Table\QueriedUserTable;
 
 class MoreMagic extends MagicQuery
 {
@@ -44,11 +58,13 @@ class MoreMagic extends MagicQuery
     public function __construct(
         AllKnownEntityFactory $entFactory,
         DBALQueryBuilder $dbalQueryBuilder,
+        EmailAddressTable $emailAddressTable,
         IssueTable $issueTable,
         IssuePriorityTable $issuePriorityTable,
         UserTable $userTable
     ) {
         parent::__construct($dbalQueryBuilder);
+        $this->emailAddressTable = $emailAddressTable;
         $this->issuePriorityTable = $issuePriorityTable;
         $this->issueTable = $issueTable;
         $this->userTable = $userTable;
@@ -61,11 +77,18 @@ class MoreMagic extends MagicQuery
         $data['last_name'] = $user->getLastName();
         $this->insertIntoMappedTable($this->userTable, QueriedUserTable::class, $data);
     }
+    
+    public function saveEmailAddress(EmailAddress $emailAddress)
+    {
+        $data = $emailAddress->toData();
+        
+        $this->insertIntoMappedTable($this->emailAddressTable, QueriedEmailAddressTable::class, $data);
+    }
 
     public function saveIssue(Issue $issue)
     {
-        $data['issue_priority_id'] = $issue->getIssueId();
-        $data['description'] = $issue->getDescription();
+        $data = $issue->toData();
+
         $this->insertIntoMappedTable($this->issueTable, QueriedIssueTable::class, $data);
     }
 
@@ -96,16 +119,49 @@ class MoreMagic extends MagicQuery
         return $userArray;
     }
     
+    public function getAllAsUserWithEmailAddress()
+    {
+        $contentArray = $this->fetch();
+        $userTableQueried = $this->queriedTables['userTableQueried'];
+        $emailAddressTableQueried = $this->queriedTables['emailAddressTableQueried'];
+
+        $entityFactory = new AllKnownEntityFactory();
+
+        //$entityFactory->create()
+        $emailAddressTableGateway = EmailAddressTableGateway::fromResultSet(
+            $entityFactory,
+            $contentArray,
+            $emailAddressTableQueried->getAlias()
+        );
+
+        $userTableGateway = UserTableGateway::fromResultSet(
+            $entityFactory,
+            $contentArray,
+            $userTableQueried->getAlias()
+        );
+
+        $userIssueTableGateway = UserEmailAddressTableGateway::fromResultSet(
+            $emailAddressTableGateway,
+            $userTableGateway,
+            $contentArray
+        );
+
+        $userWithEmailArray = $userIssueTableGateway->fetchAll();
+
+        return $userWithEmailArray;
+    }
+    
+    
     
     public function getAllAsUserWithIssues()
     {
-        $this->buildQuery(self::QUERY_TYPE_SELECT);
-//        $sql = $this->dbalQueryBuilder->getSQL();
-        
-        $statement = $this->dbalQueryBuilder->execute();
-        $contentArray = $statement->fetchAll(\PDO::FETCH_ASSOC);
+//        $this->buildQuery(self::QUERY_TYPE_SELECT);
+////        $sql = $this->dbalQueryBuilder->getSQL();
+//        
+//        $statement = $this->dbalQueryBuilder->execute();
+//        $contentArray = $statement->fetchAll(\PDO::FETCH_ASSOC);
 
-//        $contentArray = $this->fetch();
+        $contentArray = $this->fetch();
 
         $issueTableQueried = $this->queriedTables['issueTableQueried'];
         $userTableQueried = $this->queriedTables['userTableQueried'];

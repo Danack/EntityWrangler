@@ -9,6 +9,7 @@ use EntityWranglerTest\EntityDefinition\IssueCommentDefinition;
 use EntityWranglerTest\EntityDefinition\IssueDefinition;
 use EntityWranglerTest\EntityDefinition\IssuePriorityDefinition;
 use EntityWranglerTest\EntityDefinition\UserDefinition;
+use EntityWranglerTest\Model\EmailAddress;
 use EntityWranglerTest\Table\UserTable;
 use EntityWranglerTest\Table\IssuePriorityTable;
 use EntityWranglerTest\Table\IssueTable;
@@ -53,23 +54,51 @@ function createTestInjector($mocks = array(), $shares = array())
 
 function delegateTables(Injector $injector)
 {
-    $userFn = function() {
-        $userDef = new UserDefinition();
-        return UserTable::createFromDefinition($userDef);
-    };
-    $injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
+    $entities = [
+        'EmailAddress',
+        'Issue',
+        'IssuePriority',
+        'User'
+    ];
+    
+    foreach ($entities as $entity) {
+        
+        $tableName = sprintf(
+            'EntityWranglerTest\Table\%sTable',
+            $entity
+        );
+        
+        $fn = function() use ($entity, $tableName) {
+            $definitionName = sprintf(
+                'EntityWranglerTest\EntityDefinition\%sDefinition',
+                $entity
+            );
 
-    $issueFn = function() {
-        $issueDef = new IssueDefinition();
-        return IssueTable::createFromDefinition($issueDef);
-    };
-    $injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
+            $userDef = new $definitionName();
+            return $tableName::createFromDefinition($userDef);
+        };
 
-    $issuePriorityFn = function() {
-        $issuePriorityDef = new IssuePriorityDefinition();
-        return IssuePriorityTable::createFromDefinition($issuePriorityDef);
-    };
-    $injector->delegate('EntityWranglerTest\Table\IssuePriorityTable', $issuePriorityFn);
+        $injector->delegate($tableName, $fn);
+    }
+    
+    
+//    $userFn = function() {
+//        $userDef = new UserDefinition();
+//        return UserTable::createFromDefinition($userDef);
+//    };
+//    $injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
+
+//    $issueFn = function() {
+//        $issueDef = new IssueDefinition();
+//        return IssueTable::createFromDefinition($issueDef);
+//    };
+//    $injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
+
+//    $issuePriorityFn = function() {
+//        $issuePriorityDef = new IssuePriorityDefinition();
+//        return IssuePriorityTable::createFromDefinition($issuePriorityDef);
+//    };
+//    $injector->delegate('EntityWranglerTest\Table\IssuePriorityTable', $issuePriorityFn);
 }
 
 
@@ -132,6 +161,10 @@ function setupDatabase(Injector $injector)
     $userDan = User::create('Dan','dman');
     $magicQuery = clone $query;
     $magicQuery->saveUser($userDan);
+    
+    $emailAddress = EmailAddress::create('Danack@example.com', $userDan->getUserId());
+    $magicQuery = clone $query;
+    $magicQuery->saveEmailAddress($emailAddress);
     
     $userGordon = User::create('Gordon','Smith');
     $magicQuery = clone $query;

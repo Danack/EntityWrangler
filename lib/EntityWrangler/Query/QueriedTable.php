@@ -35,6 +35,16 @@ class QueriedTable
     {
         return $this->entityTable;
     }
+    
+    public function limit($limit)
+    {
+        $this->abstractQuery->limit($limit);
+    }
+    
+    public function order($column, $orderValue = 'ASC')
+    {
+        $this->abstractQuery->order($this, $column, $orderValue);
+    }
 
     function getQuery()
     {
@@ -81,11 +91,14 @@ class QueriedTable
     }
 
     /**
-     * @return EntityProperty[]
+     * @return \EntityWrangler\Definition\EntityField[]
      */
     function getColumns()
     {
-        return $this->getEntityTable()->getProperties();
+        $properties = $this->getEntityTable()->getProperties();
+        $relations = $this->getEntityTable()->getRelations();
+
+        return array_merge($properties, $relations);
     }
 
 
