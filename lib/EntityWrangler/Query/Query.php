@@ -7,6 +7,7 @@ use EntityWrangler\EntityWranglerException;
 use EntityWrangler\SafeAccess;
 use EntityWrangler\QueryFragment;
 use EntityWrangler\QueryFragment\WhereFragment;
+use EntityWrangler\QueryFragment\WhereInFragment;
 use EntityWrangler\QueryFragment\SelectColumnFragment;
 use EntityWrangler\QueryFragment\TableFragment;
 use EntityWrangler\QueryFragment\InsertFragment;
@@ -182,6 +183,12 @@ class Query
         $this->queryFragments[] = new WhereFragment($condition, $value, $type);
     }
 
+    function whereIn($condition, $values, $type)
+    {
+        $this->queryFragments[] = new WhereInFragment($condition, $values, $type);
+    }
+
+
     /**
      * Adds a GROUP BY fragment to a query.
      *
@@ -213,7 +220,7 @@ class Query
      */
     function rand(QueriedTable $table, QueriedTable $table2)
     {
-        $this->queryFragments[] = new SQLRandOrderFragment($table, $table2);
+        $this->queryFragments[] = new RandOrderFragment($table, $table2);
     }
 
 

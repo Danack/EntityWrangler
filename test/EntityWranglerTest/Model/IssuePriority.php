@@ -7,6 +7,10 @@ use Ramsey\Uuid\Uuid;
 class IssuePriority
 {
 
+    const COLUMN_ISSUE_PRIORITY_ID = 'issue_priority_id';
+
+    const COLUMN_DESCRIPTION = 'description';
+
     public $issuePriorityId = null;
 
     public $description = null;

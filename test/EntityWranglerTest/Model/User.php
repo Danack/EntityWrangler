@@ -7,6 +7,12 @@ use Ramsey\Uuid\Uuid;
 class User
 {
 
+    const COLUMN_USER_ID = 'user_id';
+
+    const COLUMN_FIRST_NAME = 'first_name';
+
+    const COLUMN_LAST_NAME = 'last_name';
+
     public $userId = null;
 
     public $firstName = null;

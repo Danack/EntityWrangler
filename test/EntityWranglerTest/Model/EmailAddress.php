@@ -7,6 +7,12 @@ use Ramsey\Uuid\Uuid;
 class EmailAddress
 {
 
+    const COLUMN_EMAIL_ADDRESS_ID = 'email_address_id';
+
+    const COLUMN_ADDRESS = 'address';
+
+    const COLUMN_USER_ID = 'user_id';
+
     public $emailAddressId = null;
 
     public $address = null;

@@ -22,13 +22,13 @@ class QueriedTable
     /**
      * @var Query
      */
-    private $abstractQuery;
+    private $query;
 
     function __construct(EntityTable $entity, $alias, Query $abstractQuery)
     {
         $this->entityTable = $entity;
         $this->alias = $alias;
-        $this->abstractQuery = $abstractQuery;
+        $this->query = $abstractQuery;
     }
 
     function getEntityTable()
@@ -38,19 +38,19 @@ class QueriedTable
     
     public function limit($limit)
     {
-        $this->abstractQuery->limit($limit);
+        $this->query->limit($limit);
 
         return $this;
     }
     
     public function order($column, $orderValue = 'ASC')
     {
-        $this->abstractQuery->order($this, $column, $orderValue);
+        $this->query->order($this, $column, $orderValue);
     }
 
     function getQuery()
     {
-        return $this->abstractQuery;
+        return $this->query;
     }
 
     /**
@@ -144,18 +144,18 @@ class QueriedTable
     }
 
 
-    /**
-     * @return QueriedTable
-     */
-    function rand()
-    {
-        $aliasedTable = $this->getQuery()->aliasTableMap($this->getEntityTable());
-        $this->getQuery()->rand($this, $aliasedTable);
-        $this->getQuery()->order($this, $this->getEntityTable()->getIdentityColumnName());
-        $this->getQuery()->limit(1);
-
-        return $aliasedTable;
-    }
+//    /**
+//     * @return QueriedTable
+//     */
+//    function rand()
+//    {
+//        $aliasedTable = $this->getQuery()->aliasTableMap($this->getEntityTable());
+//        $this->getQuery()->rand($this, $aliasedTable);
+//        $this->getQuery()->order($this, $this->getEntityTable()->getIdentityColumnName());
+//        $this->getQuery()->limit(1);
+//
+//        return $aliasedTable;
+//    }
 
 
     /**
@@ -189,11 +189,6 @@ class QueriedTable
             }
 
             case(EntityProperty::DATA_TYPE_HASH): {
-                //$passwordHasher = new PasswordHash(8, false);
-                //echo "Hashing [$value]";
-                //$hash = $passwordHasher->HashPassword($value);
-                //echo " gives value $hash";
-
                 $options = array('cost' => 11);
                 $hash = password_hash($value, PASSWORD_BCRYPT, $options);
                 $this->getQuery()->where($sqlFunctionName.$lb.$columnName .$rb." = ? ", $hash, $dataType);
@@ -219,21 +214,9 @@ class QueriedTable
      */
     function whereColumnIn($column, array $values)
     {
-        $columnName = $this->getColumn($column);
         $dataType = $this->getEntityTable()->getDataTypeForColumn($column, null);
-        $dataTypeArray = '';
-        $inString = " in ( ";
-        $separator = '';
-        //TODO replace with count?
-        /** @noinspection PhpUnusedLocalVariableInspection */
-        foreach ($values as $value) {
-            $inString .= $separator.' ? ';
-            $dataTypeArray .= $dataType;
-            $separator = ', ';
-        }
-
-        $inString .= " ) ";
-        $this->getQuery()->where($columnName.$inString, $values, $dataTypeArray);
+        $columnName = $this->getColumn(snakify($column));
+        $this->query->whereIn($columnName, $values, $dataType);
         return $this;
     }
 

@@ -7,6 +7,14 @@ use Ramsey\Uuid\Uuid;
 class IssueComment
 {
 
+    const COLUMN_ISSUE_COMMENT_ID = 'issue_comment_id';
+
+    const COLUMN_TEXT = 'text';
+
+    const COLUMN_ISSUE_ID = 'issue_id';
+
+    const COLUMN_USER_ID = 'user_id';
+
     public $issueCommentId = null;
 
     public $text = null;

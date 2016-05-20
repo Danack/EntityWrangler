@@ -45,6 +45,16 @@ class MagicModelGenerator
         $this->classGenerator = new ClassGenerator($name, 'EntityWranglerTest\Model');
         $this->classGenerator->addUse('Ramsey\Uuid\Uuid');
         $entityFields = getAllEntityFields($this->entityDefinition, true);
+
+        foreach($entityFields as $entityField) {
+            $const = new PropertyGenerator(
+                strtoupper('COLUMN_'.$entityField->getDbName()),
+                $entityField->getDbName(),
+                PropertyGenerator::FLAG_CONSTANT
+            );
+            $this->classGenerator->addPropertyFromGenerator($const);
+        }
+
         foreach($entityFields as $entityField) {
             $property = new PropertyGenerator($entityField->getPropertyName());
             $this->classGenerator->addPropertyFromGenerator($property);

@@ -3,8 +3,8 @@
 
 namespace EntityWrangler\QueryFragment;
 
-use EntityWrangler\QueriedTable;
-use EntityWrangler\SQLQuery;
+use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
+use EntityWrangler\Query\Query;
 use EntityWrangler\QueryFragment;
 
 //http://jan.kneschke.de/projects/mysql/order-by-rand/
@@ -21,7 +21,8 @@ class RandOrderFragment extends SQLFragment {
     public function offsetBit(Query $query) { }
     public function orderBit(Query $query) { }
     
-    function __construct(QueriedTable $tableMap, QueriedTable $tableMap2, $orderValue= 'ASC'){
+    function __construct(QueriedTable $tableMap, QueriedTable $tableMap2, $orderValue= 'ASC')
+    {
         $this->tableMap = $tableMap;
         $this->tableMap2 = $tableMap2;
         $this->orderValue = $orderValue;
@@ -29,20 +30,30 @@ class RandOrderFragment extends SQLFragment {
 
 
     public function insertBit(Query $query) { }
-    function randBit(SQLQuery $sqlQuery, &$tableMap){
 
-        //http://jan.kneschke.de/projects/mysql/order-by-rand/
-        /** @var  $sqlFragment SQLRandOrderFragment */
-        $tableMap = $this->tableMap;
-        $tableMap2 = $this->tableMap2;
+    function randBit(Query $query) {
 
-        $sqlQuery->addSQL(" inner join  (SELECT (RAND() *
-                             (SELECT MAX(".$tableMap->getPrimaryColumn().")
-                        FROM ".$tableMap2->getSchema().".".$tableMap2->getTableName().")) as ".$tableMap->getPrimaryColumn()." )
-                    AS ".$tableMap2->getAlias()."_rand");
+        $fn = function (DBALQueryBuilder $queryBuilder) {
+            $tableMap = $this->tableMap;
+            $tableMap2 = $this->tableMap2;
 
-        $sqlQuery->addSQL( " where ".$tableMap->getAliasedPrimaryColumn()."  >= ".$tableMap2->getAlias()."_rand.".$tableMap2->getPrimaryColumn() );
+            // Argh - this only works when we are using integer based primary keys.
+//            $sqlQuery->addSQL(" inner join  (SELECT (RAND() *
+//                             (SELECT MAX(".$tableMap->getPrimaryColumn().")
+//                        FROM ".$tableMap2->getSchema().".".$tableMap2->getTableName().")) as ".$tableMap->getPrimaryColumn()." )
+//                    AS ".$tableMap2->getAlias()."_rand");
 
+
+            $whereString = sprintf(
+                "%s  >= %s_rand.%s",
+                $tableMap->getAliasedPrimaryColumn(),
+                $tableMap2->getAlias(),
+                $tableMap2->getPrimaryColumn()
+            );
+            $queryBuilder->where($whereString);
+
+            return $queryBuilder;
+        };
     }
 }
 

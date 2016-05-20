@@ -53,8 +53,6 @@ class MoreMagic extends MagicQuery
 {
     use SafeAccess;
 
-    private $magicQuery;
-    
     public function __construct(
         AllKnownEntityFactory $entFactory,
         DBALQueryBuilder $dbalQueryBuilder,

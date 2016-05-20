@@ -64,17 +64,11 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->assertEmpty($contentArray, "John shouldn't have been found.");
     }
 
-    /**
-     * @group magic
-     */
     function testSelectWhereSimple()
     {
         $userEntity = $this->query->userTable()->whereColumn('firstName', 'Dan');
         $emailAddressEntity = $this->query->emailAddressTable();
-
         $userWithEmailAddressesList = $this->query->fetchAsUserWithEmailAddress();
-
-
         $object = $userWithEmailAddressesList[0];
         $this->assertInstanceOf('EntityWranglerTest\Model\User', $object->user);
         $this->assertInternalType('array', $object->emailAddresses);
@@ -86,24 +80,16 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals("Danack@example.com", $emailAddress->address);
     }
 
-    /**
-     * @group testing
-     */
+
     public function testLimit()
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
         //$userTable = EntityTable::createFromDefinition(new UserDefinition());
         $query->userTable()->limit(1);
-
         $contentArray = $query->fetch();
-
         $this->assertCount(1, $contentArray);
     }
 
-
-        /**
-     * @group testing
-     */
     public function testOffset()
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
@@ -114,9 +100,21 @@ class BasicTest extends \PHPUnit_Framework_TestCase
 
         $this->assertCount(1, $contentArray);
     }
-    
-    
+
     function testOrder()
+    {
+        global $userDan, $userGordon;
+
+        $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
+        $query->userTable()->order(User::COLUMN_FIRST_NAME, 'DESC');
+
+        $contentArray = $query->fetch();
+        $this->assertEquals($userGordon->getUserId(), $contentArray[0]['User_user_id']);
+        $this->assertEquals($userDan->getUserId(), $contentArray[1]['User_user_id']);
+    }
+
+
+    function testOrderByEntity()
     {
         global $userDan, $userGordon;
 
@@ -129,9 +127,6 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($userDan->getUserId(), $contentArray[1]['User_user_id']);
     }
 
-    /**
-     * @group magic
-     */
     function testMoreMagic()
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
@@ -144,5 +139,18 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             $this->assertEquals("Dan", $userWithIssues->user->firstName);
             $this->assertCount(2, $userWithIssues->issues);
         }
+    }
+
+    /**
+     * @group magic
+     */
+    function testSelectWhereIn()
+    {
+        global $userDan;
+
+        $this->query->userTable()->whereColumnIn('firstName'/* User::COLUMN_FIRST_NAME */, ['aaaa', 'bbbb', $userDan->getFirstName()]);
+        $contentArray = $this->query->fetch();
+        $this->assertInternalType('array', $contentArray);
+        $this->assertEquals($userDan->getFirstName(), $contentArray[0]['User_first_name']);
     }
 }

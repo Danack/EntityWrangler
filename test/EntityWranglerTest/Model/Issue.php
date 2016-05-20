@@ -7,6 +7,14 @@ use Ramsey\Uuid\Uuid;
 class Issue
 {
 
+    const COLUMN_ISSUE_ID = 'issue_id';
+
+    const COLUMN_DESCRIPTION = 'description';
+
+    const COLUMN_TEXT = 'text';
+
+    const COLUMN_USER_ID = 'user_id';
+
     public $issueId = null;
 
     public $description = null;
