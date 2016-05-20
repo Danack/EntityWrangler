@@ -4,6 +4,7 @@ use Auryn\Injector;
 use EntityWrangler\MagicGenerator\MagicCompositeModelGenerator;
 use EntityWrangler\MagicGenerator\MagicModelGenerator;
 use EntityWrangler\CompositeEntity;
+use EntityWrangler\CompositeElement;
 
 $autoloader = require(__DIR__.'/../vendor/autoload.php');
 
@@ -61,33 +62,27 @@ $queryGenerator->generate();
 
 $compositeEntities = [
     new CompositeEntity('UserWithIssues', [
-        'User' => CompositeEntity::TYPE_SINGLE,
-        'Issue' => CompositeEntity::TYPE_ARRAY
+        new CompositeElement('User', 'User', CompositeEntity::TYPE_SINGLE),
+        new CompositeElement('Issue', 'Issues', CompositeEntity::TYPE_ARRAY),
     ]),
-    
     new CompositeEntity('IssueWithComments', [
-        'Issue' => CompositeEntity::TYPE_SINGLE,
-        'IssueComment' => CompositeEntity::TYPE_ARRAY
+        new CompositeElement('Issue', 'Issue', CompositeEntity::TYPE_SINGLE),
+        new CompositeElement('IssueComment', 'IssueComments', CompositeEntity::TYPE_ARRAY),
     ]),
-
     new CompositeEntity('UserWithIssuesWithComments', [
-        'User' => CompositeEntity::TYPE_SINGLE,
-        'IssueWithComments' => CompositeEntity::TYPE_ARRAY
+        new CompositeElement('User', 'User', CompositeEntity::TYPE_SINGLE),
+        new CompositeElement('IssueWithComments', 'IssueWithComments', CompositeEntity::TYPE_ARRAY)
     ]),
     new CompositeEntity('UserWithEmailAddress', [
-        'User' => CompositeEntity::TYPE_SINGLE,
-        'EmailAddress' => CompositeEntity::TYPE_SINGLE
+        new CompositeElement('User', 'User', CompositeEntity::TYPE_SINGLE),
+        new CompositeElement('EmailAddress', 'EmailAddress', CompositeEntity::TYPE_SINGLE)
     ]),
     new CompositeEntity('UserWithEmailAddresses', [
-        'User' => CompositeEntity::TYPE_SINGLE,
-        'EmailAddress' => CompositeEntity::TYPE_ARRAY
+        new CompositeElement('User', 'User', CompositeEntity::TYPE_SINGLE),
+        new CompositeElement('EmailAddress', 'EmailAddresses', CompositeEntity::TYPE_ARRAY)
     ]),
 ];
 
 
-
-
 $compositeModelGenerator = new MagicCompositeModelGenerator($savePath, $compositeEntities);
-
 $compositeModelGenerator->generate();
-

@@ -52,7 +52,7 @@ class MagicCompositeModelGenerator
         $this->classGenerator->setDocBlock($classDocBlock);
 
         foreach($compositeEntity->getElements() as $element) {
-            $property = new PropertyGenerator(lcfirst($element->getName()));
+            $property = new PropertyGenerator(lcfirst($element->getPropertyName()));
             $typeString = $element->getName();
             if ($element->getType() == CompositeEntity::TYPE_ARRAY) {
                 $typeString .= '[]';
@@ -67,41 +67,37 @@ class MagicCompositeModelGenerator
     public function generate()
     {
         foreach ($this->compositeEntities as $compositeEntity) {
-
             $this->setupClass($compositeEntity);
-    
-    
+            $this->addConstructorMethod($compositeEntity);
             $this->save($compositeEntity);
-    
         }
     }
 
-//    private function generateConstructor()
-//    {
-//        $body = '';
-//        $params = [];
-//        $entityFields = getAllEntityFields($this->compositeEntities, true);
-//
-//        foreach ($entityFields as $entityField) {
-//            $propertyName = $entityField->getPropertyName();
-//            $params[] = new ParameterGenerator($propertyName);
-//            $body .= sprintf(
-//                "\$this->%s = \$%s;\n",
-//                $propertyName,
-//                $propertyName
-//            );
-//        }
-//
-//        $method = new MethodGenerator(
-//            '__construct',
-//            $params,
-//            MethodGenerator::FLAG_PUBLIC,
-//            $body
-//        );
-//
-//        $this->classGenerator->addMethodFromGenerator($method);
-//    }
-//    
+    private function addConstructorMethod(CompositeEntity $compositeEntity)
+    {
+        $body = '';
+        $params = [];
+
+        foreach ($compositeEntity->getElements() as $compositeElement) {
+            $propertyName = lcfirst($compositeElement->getPropertyName());
+            $params[] = new ParameterGenerator($propertyName);
+            $body .= sprintf(
+                "\$this->%s = \$%s;\n",
+                $propertyName,
+                $propertyName
+            );
+        }
+
+        $method = new MethodGenerator(
+            '__construct',
+            $params,
+            MethodGenerator::FLAG_PUBLIC,
+            $body
+        );
+
+        $this->classGenerator->addMethodFromGenerator($method);
+    }
+
 
     private function save(CompositeEntity $compositeEntity)
     {

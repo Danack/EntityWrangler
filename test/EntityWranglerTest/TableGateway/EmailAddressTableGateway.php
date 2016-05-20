@@ -29,16 +29,16 @@ class EmailAddressTableGateway
 
     public function findAllByUserId(array $filteredRows)
     {
-        $issues = [];
+        $emailAddresses = [];
         foreach ($filteredRows as $content) {
             $values = getPrefixedData($content, $this->prefix);
-            $issues[] = $this->allKnownEntityFactory->create(
+            $emailAddresses[] = $this->allKnownEntityFactory->create(
                 $values, 
                 EmailAddress::class
             );
         }
 
-        return $issues;
+        return $emailAddresses;
     }
 
     public function fetchAll()

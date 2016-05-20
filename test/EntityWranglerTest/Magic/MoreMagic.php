@@ -118,8 +118,11 @@ class MoreMagic extends MagicQuery
 
         return $userArray;
     }
-    
-    public function getAllAsUserWithEmailAddress()
+
+    /**
+     * @return \EntityWranglerTest\Model\UserWithEmailAddresses[]
+     */
+    public function fetchAsUserWithEmailAddress()
     {
         $contentArray = $this->fetch();
         $userTableQueried = $this->queriedTables['userTableQueried'];
@@ -127,7 +130,6 @@ class MoreMagic extends MagicQuery
 
         $entityFactory = new AllKnownEntityFactory();
 
-        //$entityFactory->create()
         $emailAddressTableGateway = EmailAddressTableGateway::fromResultSet(
             $entityFactory,
             $contentArray,

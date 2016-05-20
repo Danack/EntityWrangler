@@ -18,5 +18,11 @@ class UserWithEmailAddress
      */
     public $emailAddress = null;
 
+    public function __construct($user, $emailAddress)
+    {
+        $this->user = $user;
+        $this->emailAddress = $emailAddress;
+    }
+
 
 }

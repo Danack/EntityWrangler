@@ -18,5 +18,11 @@ class UserWithIssuesWithComments
      */
     public $issueWithComments = null;
 
+    public function __construct($user, $issueWithComments)
+    {
+        $this->user = $user;
+        $this->issueWithComments = $issueWithComments;
+    }
+
 
 }

@@ -16,7 +16,13 @@ class UserWithEmailAddresses
     /**
      * @var EmailAddress[]
      */
-    public $emailAddress = null;
+    public $emailAddresses = null;
+
+    public function __construct($user, $emailAddresses)
+    {
+        $this->user = $user;
+        $this->emailAddresses = $emailAddresses;
+    }
 
 
 }

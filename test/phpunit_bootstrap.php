@@ -80,30 +80,22 @@ function delegateTables(Injector $injector)
 
         $injector->delegate($tableName, $fn);
     }
-    
-    
-//    $userFn = function() {
-//        $userDef = new UserDefinition();
-//        return UserTable::createFromDefinition($userDef);
-//    };
-//    $injector->delegate('EntityWranglerTest\Table\UserTable', $userFn);
-
-//    $issueFn = function() {
-//        $issueDef = new IssueDefinition();
-//        return IssueTable::createFromDefinition($issueDef);
-//    };
-//    $injector->delegate('EntityWranglerTest\Table\IssueTable', $issueFn);
-
-//    $issuePriorityFn = function() {
-//        $issuePriorityDef = new IssuePriorityDefinition();
-//        return IssuePriorityTable::createFromDefinition($issuePriorityDef);
-//    };
-//    $injector->delegate('EntityWranglerTest\Table\IssuePriorityTable', $issuePriorityFn);
 }
 
+/** @var $userDan User */
+$userDan = null;
+
+/** @var $userGordon User */
+$userGordon = null;
+
+/** @var $userGordon EmailAddress */
+$emailAddress = null;
 
 function setupDatabase(Injector $injector)
 {
+    global $userDan;
+    global $userGordon;
+
     $conn = DriverManager::getConnection(['pdo' => new \PDO('sqlite:testing.sqlite')]);
 
     $schemaManager = $conn->getSchemaManager();

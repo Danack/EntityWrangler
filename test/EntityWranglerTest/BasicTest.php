@@ -2,37 +2,7 @@
 
 namespace EntityWranglerTest;
 
-use EntityWrangler\EntityTable;
-use EntityWranglerTest\EntityDefinition\EmailAddressDefinition;
-use EntityWranglerTest\EntityDefinition\UserDefinition;
-use EntityWranglerTest\EntityDefinition\IssueDefinition;
-use EntityWranglerTest\EntityDefinition\IssueCommentDefinition;
-
-use Doctrine\DBAL\Driver\Connection;
-use Doctrine\DBAL\DriverManager;
-use EntityWranglerTest\Hydrator\HydratorRegistry;
-use EntityWranglerTest\Hydrator\UserWithEmailHydrator;
-use EntityWranglerTest\Hydrator\UserWithIssuesHydrator;
-use EntityWranglerTest\Hydrator\UserWithIssuesWithCommentsHydrator;
-use EntityWranglerTest\ModelComposite\UserWithIssuesWithComments;
-use EntityWranglerTest\Hydrator\IssueWithCommentsAndUserHydrator;
-
-use EntityWranglerTest\ModelComposite\UserWithIssues;
-use EntityWranglerTest\Table\UserTable;
-use EntityWranglerTest\Table\IssueTable;
-
-
-//use EntityWranglerTest\TableGateway\UserTableGateway;
 use EntityWranglerTest\Model\User;
-use EntityWrangler\EntityWranglerException; 
-
-
-
-use Ramsey\Uuid\Uuid;
-
-
-
-
 
 class BasicTest extends \PHPUnit_Framework_TestCase 
 {
@@ -47,7 +17,6 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->injector = createTestInjector();
         delegateTables($this->injector);
         setupDatabase($this->injector);
-        
         $this->query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
     }
 
@@ -60,11 +29,9 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $this->loadUser('Johnny', 'Niedermann');
     }
 
-    
     function saveUser($firstName, $lastName)
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
-        
         $user = User::create($firstName, $lastName);
         $query->saveUser($user);
 
@@ -74,26 +41,17 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     public function loadUser($firstName, $expectedLastName)
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
-        try {
-            $query->userTable()->whereColumn('firstName', $firstName);
-            $result = $query->fetchAsUsers();
-            $this->assertCount(1, $result);
-            foreach ($result as $user) {
-                $this->assertInstanceOf(User::class, $user);
-                $this->assertEquals($expectedLastName, $user->getLastName());
-                return $user;
-            }
-            $this->fail('This should never be reached');
-            return null;
-            
+        $query->userTable()->whereColumn('firstName', $firstName);
+        $result = $query->fetchAsUsers();
+        $this->assertCount(1, $result);
+        foreach ($result as $user) {
+            $this->assertInstanceOf(User::class, $user);
+            $this->assertEquals($expectedLastName, $user->getLastName());
+            return $user;
         }
-        catch (EntityWranglerException $ewe) {
-            echo "Message is: ".$ewe->getMessage();
-            echo $query->getQueryBuilder()->getSQL();
-            //exit(0);
-        }
+        $this->fail('This should never be reached');
+        return null;
     }
-
 
     /**
      * @group magic
@@ -114,45 +72,19 @@ class BasicTest extends \PHPUnit_Framework_TestCase
         $userEntity = $this->query->userTable()->whereColumn('firstName', 'Dan');
         $emailAddressEntity = $this->query->emailAddressTable();
 
-        $contentArray = $this->query->getAllAsUserWithEmailAddress();
+        $userWithEmailAddressesList = $this->query->fetchAsUserWithEmailAddress();
 
-        $object = $contentArray[0];
 
+        $object = $userWithEmailAddressesList[0];
         $this->assertInstanceOf('EntityWranglerTest\Model\User', $object->user);
-        $this->assertInstanceOf('EntityWranglerTest\Model\EmailAddress', $object->emailAddress);
-        $this->assertEquals(1, $object->user->userId);
+        $this->assertInternalType('array', $object->emailAddresses);
+        $emailAddress = $object->emailAddresses[0];
+
+        $this->assertInstanceOf('EntityWranglerTest\Model\EmailAddress', $emailAddress);
         $this->assertEquals("Dan", $object->user->firstName);
         $this->assertEquals("dman", $object->user->lastName); 
-        $this->assertEquals(1, $object->emailAddress->emailAddressId);
-        $this->assertEquals("test@example.com", $object->emailAddress->address);
+        $this->assertEquals("Danack@example.com", $emailAddress->address);
     }
-
-//    /**
-//     * @group testing
-//     */
-//    function testSelectWhereIssues()
-//    {   
-//        $query = $this->injector->make('EntityWrangler\Query\Query');
-//        
-//        $userTable = EntityTable::createFromDefinition(new UserDefinition());
-//        $issueTable = EntityTable::createFromDefinition(new IssueDefin());
-//        $issueCommentTable = EntityTable::createFromDefinition(new IssueComment());
-//
-//        $emailAddressEntity = $query->table($issueTable);
-//        $issueCommentEntity = $query->table($issueCommentTable);
-//        $userEntity = $query->table($userTable);//->whereColumn('firstName', 'Dan');
-//        $contentArray = $query->fetch();
-//
-//        $hydratorRegistry = new HydratorRegistry();
-//        $hydrator = new IssueWithCommentsAndUserHydrator(
-//            $userEntity,
-//            $emailAddressEntity,
-//            $issueCommentEntity
-//        );
-//
-//        $objects = [];
-//        $object = $hydrator->hydrate($contentArray, $hydratorRegistry);
-//    }
 
     /**
      * @group testing
@@ -161,8 +93,8 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     {
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
         //$userTable = EntityTable::createFromDefinition(new UserDefinition());
-        $userEntity = $query->userTable()->limit(1);
-        //$query->limit(1);
+        $query->userTable()->limit(1);
+
         $contentArray = $query->fetch();
 
         $this->assertCount(1, $contentArray);
@@ -186,18 +118,17 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     
     function testOrder()
     {
+        global $userDan, $userGordon;
+
         $query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
-        //$userTable = EntityTable::createFromDefinition(new UserDefinition());
         $userEntity = $query->userTable();
-        $query->order($userEntity, 'user_id', 'DESC');
+        $query->order($userEntity, 'first_name', 'DESC');
 
         $contentArray = $query->fetch();
-        $this->assertEquals(2, $contentArray[0]['User_user_id']);
-        $this->assertEquals(1, $contentArray[1]['User_user_id']);
+        $this->assertEquals($userGordon->getUserId(), $contentArray[0]['User_user_id']);
+        $this->assertEquals($userDan->getUserId(), $contentArray[1]['User_user_id']);
     }
 
-
-    
     /**
      * @group magic
      */
@@ -214,5 +145,4 @@ class BasicTest extends \PHPUnit_Framework_TestCase
             $this->assertCount(2, $userWithIssues->issues);
         }
     }
-    
 }

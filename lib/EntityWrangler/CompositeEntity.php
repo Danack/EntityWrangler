@@ -2,7 +2,7 @@
 
 namespace EntityWrangler;
 
-use\EntityWrangler\CompositeEntityElement;
+use\EntityWrangler\CompositeElement;
 
 class CompositeEntity
 {
@@ -11,16 +11,12 @@ class CompositeEntity
     
     private $name;
     
-    /** @var  CompositeEntityElement[] */
+    /** @var  CompositeElement[] */
     private $elements;
     
-    public function __construct($name, $elements)
+    public function __construct($name, $compositeElements)
     {
         $this->name = $name;
-        $compositeElements = [];
-        foreach ($elements as $key => $value) {
-            $compositeElements[] = new CompositeEntityElement($key, $value);
-        }
         $this->elements = $compositeElements;
     }
 
@@ -33,7 +29,7 @@ class CompositeEntity
     }
 
     /**
-     * @return CompositeEntityElement[]
+     * @return CompositeElement[]
      */
     public function getElements()
     {

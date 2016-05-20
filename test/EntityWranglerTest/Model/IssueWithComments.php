@@ -16,7 +16,13 @@ class IssueWithComments
     /**
      * @var IssueComment[]
      */
-    public $issueComment = null;
+    public $issueComments = null;
+
+    public function __construct($issue, $issueComments)
+    {
+        $this->issue = $issue;
+        $this->issueComments = $issueComments;
+    }
 
 
 }

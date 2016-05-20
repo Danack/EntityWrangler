@@ -16,7 +16,13 @@ class UserWithIssues
     /**
      * @var Issue[]
      */
-    public $issue = null;
+    public $issues = null;
+
+    public function __construct($user, $issues)
+    {
+        $this->user = $user;
+        $this->issues = $issues;
+    }
 
 
 }

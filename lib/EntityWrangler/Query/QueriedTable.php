@@ -39,6 +39,8 @@ class QueriedTable
     public function limit($limit)
     {
         $this->abstractQuery->limit($limit);
+
+        return $this;
     }
     
     public function order($column, $orderValue = 'ASC')
@@ -62,7 +64,8 @@ class QueriedTable
     /**
      * @return string
      */
-    function getSchema(){
+    function getSchema()
+    {
         return $this->getEntityTable()->schema;
     }
 

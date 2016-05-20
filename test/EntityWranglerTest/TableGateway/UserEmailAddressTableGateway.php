@@ -34,16 +34,16 @@ class UserEmailAddressTableGateway
     /** @return UserWithEmailAddresses[] */
     public function fetchAll()
     {
-        $userWithIssueList = [];
+        $userWithEmailsList = [];
         $users = $this->userTableGateway->fetchAll();
 
         foreach ($users as $user) {
             $filteredData = $this->userTableGateway->filterDataByUserId($this->data, $user->userId);
             $emails = $this->emailAddressTableGateway->findAllByUserId($filteredData);
-            $userWithIssues = new UserWithEmailAddresses($user, $emails);
-            $userWithIssueList[] = $userWithIssues;
+            $userWithEmails = new UserWithEmailAddresses($user, $emails);
+            $userWithEmailsList[] = $userWithEmails;
         }
 
-        return $userWithIssueList;
+        return $userWithEmailsList;
     }
 }

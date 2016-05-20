@@ -3,14 +3,15 @@
 
 namespace EntityWrangler;
 
-class CompositeEntityElement
+class CompositeElement
 {
     private $name;
     private $type;
     
-    public function __construct($name, $type)
+    public function __construct($name, $propertyName, $type)
     {
         $this->name = $name;
+        $this->propertyName = $propertyName;
         $this->type = $type;
     }
 
@@ -25,10 +26,16 @@ class CompositeEntityElement
     /**
      * @return mixed
      */
+    public function getPropertyName()
+    {
+        return $this->propertyName;
+    }
+
+    /**
+     * @return mixed
+     */
     public function getType()
     {
         return $this->type;
     }
-
-
 }
