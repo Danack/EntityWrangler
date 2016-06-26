@@ -12,7 +12,8 @@ class IssueFactory implements EntityFactory
         $issueId = extractValue($data, 'issue_id');
         $description = extractValue($data, 'description');
         $text = extractValue($data, 'text');
-        $instance = new Issue($issueId, $description, $text);
+        $userId = extractValue($data, 'user_id');
+        $instance = new Issue($issueId, $description, $text, $userId);
 
         return $instance;
     }

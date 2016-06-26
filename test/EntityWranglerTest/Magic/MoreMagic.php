@@ -8,7 +8,7 @@ use EntityWrangler\SafeAccess;
 use Doctrine\DBAL\Query\QueryBuilder as DBALQueryBuilder;
 
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWranglerTest\EntityDefinition\EmailAddressDefinition;
 use EntityWranglerTest\EntityDefinition\UserDefinition;
 use EntityWranglerTest\EntityDefinition\IssueDefinition;
@@ -70,9 +70,10 @@ class MoreMagic extends MagicQuery
     
     public function saveUser(User $user)
     {
-        $data['user_id'] = $user->getUserId();
-        $data['first_name'] = $user->getFirstName();
-        $data['last_name'] = $user->getLastName();
+        $data = $user->toData();
+//        $data['user_id'] = $user->getUserId();
+//        $data['first_name'] = $user->getFirstName();
+//        $data['last_name'] = $user->getLastName();
         $this->insertIntoMappedTable($this->userTable, QueriedUserTable::class, $data);
     }
     

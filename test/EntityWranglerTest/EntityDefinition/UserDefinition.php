@@ -12,6 +12,11 @@ use EntityWrangler\Definition\TableInfo;
 
 class UserDefinition implements EntityDefinition
 {
+    public static function isTree()
+    {
+        return false;
+    }
+    
     public static function getIdentity()
     {
         return new EntityIdentity('userId', 'user_id');

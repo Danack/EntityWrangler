@@ -2,6 +2,7 @@
 
 use EntityWrangler\EntityDefinition;
 use EntityWranglerTest\Hydrator\HydratorException;
+use EntityWrangler\SchemaBuilder;
 
 function snakify($word)
 {
@@ -98,3 +99,26 @@ function getAllEntityFields(EntityDefinition $entityDefinition, $includeIdentity
 }
 
 
+function migrateDatabase(
+    \Doctrine\DBAL\Connection $conn,
+    \EntityWrangler\EntityDefinitionList $entityDefinitionList)
+{
+    $schemaManager = $conn->getSchemaManager();
+    $fromSchema = $schemaManager->createSchema();
+    $toSchema = new \Doctrine\DBAL\Schema\Schema();
+    $schemaGenerator = new SchemaBuilder($toSchema);
+
+    foreach ($entityDefinitionList->getEntityDefinitions() as $knownEntity) {
+        $schemaGenerator->addEntityDefinition(new $knownEntity());
+    }
+    $generatedSchema = $schemaGenerator->build();
+    $sqlArray = $fromSchema->getMigrateToSql($toSchema, $conn->getDatabasePlatform());
+    foreach ($sqlArray as $sql) {
+        $conn->exec($sql);
+    }
+
+    foreach ($generatedSchema->getTableDefinitions() as $tableDefinition) {
+        $sql = "delete from ".$tableDefinition->getName();
+        $conn->exec($sql);
+    }
+}

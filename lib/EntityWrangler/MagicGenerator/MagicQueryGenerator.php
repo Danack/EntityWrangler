@@ -2,7 +2,7 @@
 
 namespace EntityWrangler\MagicGenerator;
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\SavePath;
 use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\DocBlockGenerator;
@@ -23,7 +23,7 @@ class MagicQueryGenerator
     /** @var  ClassGenerator */
     private $classGenerator;
     
-    /** @var \EntityWrangler\EntityTable[] */
+    /** @var \EntityWrangler\EntityTableDefinition[] */
     private $entities = [];
 
     public function __construct(SavePath $savePath)
@@ -31,7 +31,7 @@ class MagicQueryGenerator
         $this->savePath = $savePath;
     }
     
-    public function addEntity(EntityTable $entity)
+    public function addEntity(EntityTableDefinition $entity)
     {
         $this->entities[] = $entity;
     }
@@ -43,7 +43,7 @@ class MagicQueryGenerator
         }
     }
     
-    public function addTableFunction(EntityTable $entity)
+    public function addTableFunction(EntityTableDefinition $entity)
     {
         $tableName = lcfirst($entity->getName()).'Table';
         

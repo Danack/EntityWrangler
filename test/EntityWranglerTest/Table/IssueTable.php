@@ -2,11 +2,11 @@
 
 namespace EntityWranglerTest\Table;
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\Query\Query;
 use EntityWrangler\Query\QueriedTable;
 
-class IssueTable extends EntityTable
+class IssueTable extends EntityTableDefinition
 {
 
     /**

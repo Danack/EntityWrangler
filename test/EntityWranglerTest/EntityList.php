@@ -2,7 +2,7 @@
 
 namespace EntityWranglerTest;
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\EntityBuilder;
 use EntityWrangler\EntityWranglerException;
 
@@ -31,7 +31,7 @@ class EntityList
         }
 
         $entityDefinition = $this->entityDefinitions[$entityName];
-        $entity = new EntityTable(
+        $entity = new EntityTableDefinition(
             $entityDefinition->getName(),
             'test',
             $entityDefinition->getProperties(),

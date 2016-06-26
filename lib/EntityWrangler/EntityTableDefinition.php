@@ -10,7 +10,7 @@ use EntityWrangler\Definition\EntityProperty;
  * 
  * The description of how an Entity is stored in a database.
  */
-class EntityTable
+class EntityTableDefinition
 {
     use SafeAccess;
 
@@ -60,22 +60,49 @@ class EntityTable
         $this->relations = $relations; 
         $this->indexes = $indexes;
     }
+    
+    public static function createExtraTables(EntityDefinition $definition)
+    {
+        $tables = [];
+        
+        if ($definition->isTree() == true) {
+            $tableInfo = $definition->getTableInfo();
+            $tableName = $tableInfo->tableName.'Tree';
+            $fields = [];
+            $fields[] = new EntityProperty(
+                lcfirst($tableInfo->tableName).'Id',
+                'identity',
+                'Identity key',
+                snakify($tableInfo->tableName).'_id'
+            );
+            
+            $instance = new static(
+                $tableName,
+                $tableInfo->schemaName,
+                $fields,
+                $definition->getRelations(),
+                $definition->getIndexes()
+            );
+        }
+        
+        return $tables;
+    }
 
     public static function createFromDefinition(EntityDefinition $definition)
     {
         $fields = [];
-        $tableName = $definition->getTableInfo();
+        $tableInfo = $definition->getTableInfo();
         $fields[] = new EntityProperty(
-            lcfirst($tableName->tableName).'Id',
+            lcfirst($tableInfo->tableName).'Id',
             'identity',
             'Identity key',
-            snakify($tableName->tableName).'_id'
+            snakify($tableInfo->tableName).'_id'
         );
 
         $fields = array_merge($fields, $definition->getProperties());
         $instance = new static(
-            $tableName->tableName,
-            'test',
+            $tableInfo->tableName,
+            $tableInfo->schemaName,
             $fields,
             $definition->getRelations(),
             $definition->getIndexes()

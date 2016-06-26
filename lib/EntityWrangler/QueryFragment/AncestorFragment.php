@@ -2,14 +2,13 @@
 
 namespace EntityWrangler\QueryFragment;
 
-use EntityWrangler\QueryFragment\BindableParams;
-use EntityWrangler\QueriedTable;
+use EntityWrangler\Query\QueriedTable;
 use EntityWrangler\SQLQuery;
 use EntityWrangler\QueryFragment;
 use EntityWrangler\Query\Query;
 
 
-class AncestorFragment implements BindableParams, QueryFragment {
+class AncestorFragment implements QueryFragment {
 
     /**
      * @var QueriedTable
@@ -22,9 +21,13 @@ class AncestorFragment implements BindableParams, QueryFragment {
 
     protected $isDescendant = false;
     
+    public function insertBit(Query $query) { }
     public function limitBit(Query $query) { }
     public function offsetBit(Query $query) { }
     public function orderBit(Query $query) { }
+    public function randBit(Query $query, &$tableMap) { }
+    public function selectBit(Query $query) { }
+    public function tableBit(Query $query) { }
 
     function __construct(QueriedTable $queriedTable, QueriedTable $queriedClosureTable, $ancestorID, $isDescendant = false) {
         $this->queriedTableMap = $queriedTable;
@@ -33,8 +36,6 @@ class AncestorFragment implements BindableParams, QueryFragment {
         $this->isDescendant = $isDescendant;
     }
 
-    public function insertBit(Query $query) {}
-    
     function &getValue() {
         return $this->ancestorID;
     }
@@ -46,7 +47,8 @@ class AncestorFragment implements BindableParams, QueryFragment {
     /**
      * @return \EntityWrangler\QueriedTable
      */
-    public function getQueriedTableMap() {
+    public function getQueriedTableMap()
+    {
         return $this->queriedTableMap;
     }
 
@@ -73,7 +75,6 @@ class AncestorFragment implements BindableParams, QueryFragment {
             $sqlQuery->addSQL("on (".$alias.".".$tableMap->getPrimaryColumn()." = $closureAlias.ancestor)");
         }
     }
-
 
 
 

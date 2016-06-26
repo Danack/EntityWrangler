@@ -2,7 +2,7 @@
 
 
 namespace EntityMap;
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 
 /**
  * Class TableMapWriter
@@ -19,7 +19,7 @@ class EntityClassWriter
         $this->fileWriter = $fileWriter;
     }
 
-    function generateObjectFile(EntityTable $entity, $namespace) {
+    function generateObjectFile(EntityTableDefinition $entity, $namespace) {
 
         $output = "<?php\n\n";
         $output .= "namespace $namespace;\n\n";
@@ -31,10 +31,10 @@ class EntityClassWriter
 
 
     /**
-     * @param EntityTable $entity
+     * @param EntityTableDefinition $entity
      * @return string
      */
-    function getClassString(EntityTable $entity) {
+    function getClassString(EntityTableDefinition $entity) {
 
         $st = "    ";
 

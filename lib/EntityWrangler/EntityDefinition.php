@@ -22,4 +22,6 @@ interface EntityDefinition
     
     /** @return \EntityWrangler\Definition\EntityRelation[] */
     public static function getRelations();
+    
+    public static function isTree();
 }

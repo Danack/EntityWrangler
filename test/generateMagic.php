@@ -50,7 +50,7 @@ foreach ($descriptions as $description) {
         $descriptionObject->getTableInfo()->tableName
     );
     
-    /** @var $table \EntityWrangler\EntityTable */
+    /** @var $table \EntityWrangler\EntityTableDefinition */
     $table = $tableName::createFromDefinition(
         $descriptionObject
     );

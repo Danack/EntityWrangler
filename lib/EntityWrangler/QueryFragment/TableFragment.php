@@ -2,7 +2,7 @@
 
 namespace EntityWrangler\QueryFragment;
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\EntityWranglerException;
 use EntityWrangler\Query\QueriedTable;
 use EntityWrangler\QueryFragment;

@@ -2,7 +2,7 @@
 
 namespace EntityWrangler\Query;
 
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\EntityWranglerException;
 use EntityWrangler\SafeAccess;
 use EntityWrangler\QueryFragment;
@@ -77,12 +77,12 @@ class Query
     }
 
     /**
-     * @param EntityTable $entity
+     * @param EntityTableDefinition $entity
      * @param $entityClassName
      * @param QueriedTable $joinEntity
      * @return QueriedTable
      */
-    function table(EntityTable $entity, $entityClassName, QueriedTable $joinEntity = null)
+    function table(EntityTableDefinition $entity, $entityClassName, QueriedTable $joinEntity = null)
     {
         if ($joinEntity == null) {
             $joinEntity = $this->previousTable;
@@ -96,7 +96,7 @@ class Query
         return $newFragment->queriedEntity;
     }
 
-    function leftTable(EntityTable $entity,  $entityClassName, QueriedTable $joinEntity = null)
+    function leftTable(EntityTableDefinition $entity,  $entityClassName, QueriedTable $joinEntity = null)
     {
         if ($joinEntity == null) {
             if ($this->previousTable == null) {
@@ -146,10 +146,10 @@ class Query
     }
 
     /**
-     * @param EntityTable $entity
+     * @param EntityTableDefinition $entity
      * @return mixed
      */
-    function getAliasForTable(EntityTable $entity)
+    function getAliasForTable(EntityTableDefinition $entity)
     {
         $tableName = $entity->getName();
         if(in_array($tableName, $this->entityNamesUsed) == FALSE){
@@ -293,11 +293,11 @@ class Query
 
 
     /**
-     * @param EntityTable $tableMap
+     * @param EntityTableDefinition $tableMap
      * @param $entityClassName
      * @return QueriedTable
      */
-    function aliasEntity(EntityTable $tableMap, $entityClassName)
+    function aliasEntity(EntityTableDefinition $tableMap, $entityClassName)
     {
         $tableAlias = $this->getAliasForTable($tableMap);
 
@@ -872,7 +872,7 @@ class Query
 
 
     //This stays table map
-    function insertIntoMappedTable(EntityTable $tableMap, $entityClassName, $data, $foreignKeys = array())
+    function insertIntoMappedTable(EntityTableDefinition $tableMap, $entityClassName, $data, $foreignKeys = array())
     {
         $queriedTable = $this->aliasEntity($tableMap, $entityClassName);
         $this->queryFragments[] = new InsertFragment($queriedTable, $data);

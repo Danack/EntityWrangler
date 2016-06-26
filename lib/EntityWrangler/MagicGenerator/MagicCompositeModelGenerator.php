@@ -3,7 +3,7 @@
 namespace EntityWrangler\MagicGenerator;
 
 use EntityWrangler\Definition\EntityProperty;
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\SavePath;
 use Zend\Code\Generator\ClassGenerator;
 use Zend\Code\Generator\DocBlockGenerator;

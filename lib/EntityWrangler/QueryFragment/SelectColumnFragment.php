@@ -4,14 +4,14 @@ namespace EntityWrangler\QueryFragment;
 
 use EntityWrangler\Query\Query;
 use EntityWrangler\QueryFragment;
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 
 
 class SelectColumnFragment implements QueryFragment
 {
 
     /**
-     * @var EntityTable
+     * @var EntityTableDefinition
      */
     var $tableMap;
 
@@ -28,7 +28,7 @@ class SelectColumnFragment implements QueryFragment
     public function whereBit(Query $query) { }
     public function limitBit(Query $query) { }
     
-    function __construct(EntityTable $tableMap, $column) {
+    function __construct(EntityTableDefinition $tableMap, $column) {
         $this->tableMap = $tableMap;
         $this->column = $column;
     }

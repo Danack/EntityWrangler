@@ -18,6 +18,7 @@ class EntityProperty implements EntityField
     const DATA_TYPE_INT         = 'int';
     const DATA_TYPE_DATETIME    = 'datetime';
     const DATA_TYPE_HASH        = 'hash';
+    const DATA_TYPE_UUID        = 'uuid';
     
     // e.g. when doing an insert, and the datetime column has default of now().
     const DATA_TYPE_NONE        = 'none';

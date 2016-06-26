@@ -12,6 +12,11 @@ use EntityWrangler\Definition\EntityRelation;
 
 class IssueDefinition implements EntityDefinition
 {
+    public static function isTree()
+    {
+        return false;
+    }
+    
     public static function getIdentity()
     {
         return new EntityIdentity('issueId', 'issue_id');

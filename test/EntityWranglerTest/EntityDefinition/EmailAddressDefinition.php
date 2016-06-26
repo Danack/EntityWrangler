@@ -12,6 +12,11 @@ use EntityWrangler\Definition\EntityRelation;
 
 class EmailAddressDefinition implements EntityDefinition
 {
+    public static function isTree()
+    {
+        return false;
+    }
+    
     public static function getIdentity()
     {
         return new EntityIdentity('emailAddressId', 'email_address_id');

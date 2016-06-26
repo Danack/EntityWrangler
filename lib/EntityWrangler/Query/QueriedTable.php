@@ -3,7 +3,7 @@
 namespace EntityWrangler\Query;
 
 use EntityWrangler\SafeAccess;
-use EntityWrangler\EntityTable;
+use EntityWrangler\EntityTableDefinition;
 use EntityWrangler\Query\Query;
 use EntityWrangler\Definition\EntityProperty;
 use EntityWrangler\UnsupportedOperationException;
@@ -15,7 +15,7 @@ class QueriedTable
     private $alias;
 
     /**
-     * @var EntityTable
+     * @var EntityTableDefinition
      */
     private $entityTable;
 
@@ -24,7 +24,7 @@ class QueriedTable
      */
     private $query;
 
-    function __construct(EntityTable $entity, $alias, Query $abstractQuery)
+    function __construct(EntityTableDefinition $entity, $alias, Query $abstractQuery)
     {
         $this->entityTable = $entity;
         $this->alias = $alias;

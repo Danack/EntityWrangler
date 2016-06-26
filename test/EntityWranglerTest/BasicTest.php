@@ -3,6 +3,14 @@
 namespace EntityWranglerTest;
 
 use EntityWranglerTest\Model\User;
+use EntityWranglerTest\EntityDefinition\EmailAddressDefinition;
+use EntityWranglerTest\EntityDefinition\IssueCommentDefinition;
+use EntityWranglerTest\EntityDefinition\IssueDefinition;
+use EntityWranglerTest\EntityDefinition\IssuePriorityDefinition;
+use EntityWranglerTest\EntityDefinition\UserDefinition;
+use EntityWrangler\EntityDefinitionList\ArrayEntityDefinitionList;
+use Doctrine\DBAL\DriverManager;
+
 
 class BasicTest extends \PHPUnit_Framework_TestCase 
 {
@@ -14,9 +22,20 @@ class BasicTest extends \PHPUnit_Framework_TestCase
     
     public function setup()
     {
+        $entityDefinitionList = new ArrayEntityDefinitionList([
+            IssuePriorityDefinition::class,
+            IssueCommentDefinition::class,
+            IssueDefinition::class,
+            UserDefinition::class,
+            EmailAddressDefinition::class,
+        ]);
+        
+        
         $this->injector = createTestInjector();
         delegateTables($this->injector);
-        setupDatabase($this->injector);
+        $conn = DriverManager::getConnection(['pdo' => new \PDO('sqlite:testing.sqlite')]);
+        migrateDatabase($conn, $entityDefinitionList);
+        createData($this->injector);
         $this->query = $this->injector->make('EntityWranglerTest\Magic\MoreMagic');
     }
 
